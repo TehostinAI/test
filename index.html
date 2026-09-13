@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nokia 2110 - Mato</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2b2b2b;
+    font-family: 'Courier New', monospace;
+  }
+
+  .phone {
+    width: 340px;
+    background: linear-gradient(180deg, #4a4a52, #2c2c32);
+    border-radius: 28px;
+    padding: 22px 18px 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.15);
+  }
+
+  .brand {
+    text-align: center;
+    color: #cfd3da;
+    font-size: 14px;
+    letter-spacing: 4px;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+
+  .screen-bezel {
+    background: #1c1c1c;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+  }
+
+  .screen {
+    position: relative;
+    background: #9bbf5a;
+    border: 2px solid #6f8f3f;
+    aspect-ratio: 84 / 48;
+    width: 100%;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    color: #cfd3da;
+    font-size: 11px;
+    margin: 10px 4px 4px;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 44px);
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .btn {
+    background: linear-gradient(180deg, #55555e, #38383e);
+    border-radius: 8px;
+    border: 1px solid #1c1c20;
+    color: #d8d8de;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+  }
+  .btn:active { transform: translateY(1px); box-shadow: none; }
+
+  #up { grid-column: 2; grid-row: 1; }
+  #left { grid-column: 1; grid-row: 2; }
+  #ok { grid-column: 2; grid-row: 2; background: linear-gradient(180deg, #6a7a4a, #4c5a35); }
+  #right { grid-column: 3; grid-row: 2; }
+  #down { grid-column: 2; grid-row: 3; }
+
+  .hint {
+    text-align: center;
+    color: #8a8a92;
+    font-size: 11px;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="brand">NOKIA 2110</div>
+    <div class="screen-bezel">
+      <div class="screen">
+        <canvas id="game" width="84" height="48"></canvas>
+      </div>
+    </div>
+    <div class="statusbar">
+      <span id="score">PISTEET: 0</span>
+      <span id="best">PARAS: 0</span>
+    </div>
+    <div class="controls">
+      <div class="btn" id="up">&#9650;</div>
+      <div class="btn" id="left">&#9664;</div>
+      <div class="btn" id="ok">OK</div>
+      <div class="btn" id="right">&#9654;</div>
+      <div class="btn" id="down">&#9660;</div>
+    </div>
+    <div class="hint">Nuolinäppäimet / WASD liikkuu &middot; Välilyönti tai OK aloittaa</div>
+  </div>
+
+<script>
+(function () {
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+
+  var COLS = 42, ROWS = 24; // logical grid, 2x2 px per cell on 84x48 canvas
+  var CELL = 2;
+
+  var COLOR_BG = '#9bbf5a';
+  var COLOR_FG = '#2b3a17';
+
+  var snake, dir, nextDir, food, score, best, running, gameOver, tickMs, timer;
+
+  best = Number(localStorage.getItem('nokiaSnakeBest') || 0);
+  document.getElementById('best').textContent = 'PARAS: ' + best;
+
+  function reset() {
+    snake = [
+      { x: 10, y: 12 },
+      { x: 9, y: 12 },
+      { x: 8, y: 12 }
+    ];
+    dir = { x: 1, y: 0 };
+    nextDir = dir;
+    score = 0;
+    tickMs = 160;
+    gameOver = false;
+    running = false;
+    placeFood();
+    updateScore();
+    draw();
+  }
+
+  function placeFood() {
+    var valid = false;
+    while (!valid) {
+      food = {
+        x: Math.floor(Math.random() * COLS),
+        y: Math.floor(Math.random() * ROWS)
+      };
+      valid = !snake.some(function (s) { return s.x === food.x && s.y === food.y; });
+    }
+  }
+
+  function updateScore() {
+    document.getElementById('score').textContent = 'PISTEET: ' + score;
+  }
+
+  function start() {
+    if (running) return;
+    if (gameOver) reset();
+    running = true;
+    loop();
+  }
+
+  function loop() {
+    clearTimeout(timer);
+    if (!running) return;
+    step();
+    draw();
+    if (!gameOver) {
+      timer = setTimeout(loop, tickMs);
+    }
+  }
+
+  function step() {
+    dir = nextDir;
+    var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+    // wrap around edges, like the original phone game
+    if (head.x < 0) head.x = COLS - 1;
+    if (head.x >= COLS) head.x = 0;
+    if (head.y < 0) head.y = ROWS - 1;
+    if (head.y >= ROWS) head.y = 0;
+
+    if (snake.some(function (s) { return s.x === head.x && s.y === head.y; })) {
+      endGame();
+      return;
+    }
+
+    snake.unshift(head);
+
+    if (head.x === food.x && head.y === food.y) {
+      score += 1;
+      updateScore();
+      if (tickMs > 70) tickMs -= 4;
+      placeFood();
+    } else {
+      snake.pop();
+    }
+  }
+
+  function endGame() {
+    running = false;
+    gameOver = true;
+    if (score > best) {
+      best = score;
+      localStorage.setItem('nokiaSnakeBest', String(best));
+      document.getElementById('best').textContent = 'PARAS: ' + best;
+    }
+    draw();
+  }
+
+  function pixel(gx, gy) {
+    ctx.fillRect(gx * CELL, gy * CELL, CELL, CELL);
+  }
+
+  function draw() {
+    ctx.fillStyle = COLOR_BG;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = COLOR_FG;
+
+    snake.forEach(function (s) { pixel(s.x, s.y); });
+    pixel(food.x, food.y);
+
+    if (!running) {
+      ctx.font = '5px monospace';
+      ctx.textAlign = 'center';
+      if (gameOver) {
+        ctx.fillText('PELI OHI', canvas.width / 2, 20);
+        ctx.font = '4px monospace';
+        ctx.fillText('PISTEET ' + score, canvas.width / 2, 28);
+        ctx.fillText('PAINA OK', canvas.width / 2, 40);
+      } else {
+        ctx.fillText('MATO', canvas.width / 2, 20);
+        ctx.font = '4px monospace';
+        ctx.fillText('PAINA OK', canvas.width / 2, 32);
+      }
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function setDir(x, y) {
+    // prevent reversing directly into the snake's own body
+    if (snake.length > 1 && dir.x === -x && dir.y === -y) return;
+    nextDir = { x: x, y: y };
+    start();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    switch (e.key) {
+      case 'ArrowUp': case 'w': case 'W': setDir(0, -1); e.preventDefault(); break;
+      case 'ArrowDown': case 's': case 'S': setDir(0, 1); e.preventDefault(); break;
+      case 'ArrowLeft': case 'a': case 'A': setDir(-1, 0); e.preventDefault(); break;
+      case 'ArrowRight': case 'd': case 'D': setDir(1, 0); e.preventDefault(); break;
+      case ' ': case 'Enter': start(); e.preventDefault(); break;
+    }
+  });
+
+  document.getElementById('up').addEventListener('click', function () { setDir(0, -1); });
+  document.getElementById('down').addEventListener('click', function () { setDir(0, 1); });
+  document.getElementById('left').addEventListener('click', function () { setDir(-1, 0); });
+  document.getElementById('right').addEventListener('click', function () { setDir(1, 0); });
+  document.getElementById('ok').addEventListener('click', function () { start(); });
+
+  reset();
+})();
+</script>
+</body>
+</html>
