@@ -1,0 +1,1716 @@
+<meta charset="utf-8">
+<title>Puolustusalan peruskurssi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap">
+
+<style>
+  :root {
+    --bg: #edf0f2;
+    --surface: #ffffff;
+    --surface-2: #f4f7f8;
+    --ink: #101a20;
+    --ink-2: #45545e;
+    --ink-3: #6e7e89;
+    --line: #d5dce1;
+    --line-strong: #b9c5cc;
+    --accent: #9c5309;
+    --accent-bg: #fbf1e4;
+    --bar: #b3600d;
+    --steel: #14414f;
+    --steel-bg: #e4ecef;
+    --shadow: 0 1px 2px rgba(16, 26, 32, .06), 0 8px 24px -16px rgba(16, 26, 32, .3);
+
+    --display: "IBM Plex Sans Condensed", "Helvetica Neue", Arial, sans-serif;
+    --body: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1317;
+      --surface: #141c21;
+      --surface-2: #1a242a;
+      --ink: #e8eef1;
+      --ink-2: #a9b8c1;
+      --ink-3: #7d8e98;
+      --line: #253138;
+      --line-strong: #35454e;
+      --accent: #e8a250;
+      --accent-bg: #241a10;
+      --bar: #ce7e26;
+      --steel: #58a7bf;
+      --steel-bg: #14262c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0d1317;
+    --surface: #141c21;
+    --surface-2: #1a242a;
+    --ink: #e8eef1;
+    --ink-2: #a9b8c1;
+    --ink-3: #7d8e98;
+    --line: #253138;
+    --line-strong: #35454e;
+    --accent: #e8a250;
+    --accent-bg: #241a10;
+    --bar: #ce7e26;
+    --steel: #58a7bf;
+    --steel-bg: #14262c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16.5px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- runko ---------- */
+
+  .shell {
+    display: grid;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+    gap: 2.5rem;
+    max-width: 74rem;
+    margin: 0 auto;
+    padding-inline: 1.25rem;
+    padding-block: 2.5rem 0;
+    align-items: start;
+  }
+
+  /* ---------- sivunavigaatio ---------- */
+
+  .rail { position: sticky; top: 2.5rem; }
+
+  .rail-head { margin-bottom: 1.5rem; }
+
+  .kicker {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .rail-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    margin: .35rem 0 0;
+    text-wrap: balance;
+  }
+
+  .progress {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    transition: width .35s ease;
+  }
+
+  .progress-text {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--line);
+  }
+
+  .rail-link {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.5rem minmax(0, 1fr) .875rem;
+    align-items: baseline;
+    gap: .5rem;
+    padding: .6875rem .25rem;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    color: var(--ink-2);
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .rail-link:hover { color: var(--ink); }
+
+  .rail-link[aria-current="true"] {
+    color: var(--ink);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  .rail-num {
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail-link[aria-current="true"] .rail-num { color: var(--accent); }
+
+  .rail-tick {
+    font-size: .8125rem;
+    color: var(--accent);
+    opacity: 0;
+    justify-self: end;
+  }
+
+  .rail-link[data-done="true"] .rail-tick { opacity: 1; }
+
+  /* ---------- sisältö ---------- */
+
+  .sheet {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+    padding: 2.5rem 2.75rem 3rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .sheet-head {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin: .4rem 0 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    margin: .875rem 0 0;
+    max-width: 42ch;
+    font-size: 1.0625rem;
+    color: var(--ink-2);
+    font-style: italic;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.3125rem;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+    margin: 2.25rem 0 .625rem;
+    text-wrap: balance;
+  }
+
+  h4 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    margin: 0 0 .25rem;
+  }
+
+  p { margin: 0 0 1rem; max-width: 66ch; }
+  .sheet > p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 600; }
+
+  .lead-in {
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  ul.plain, ol.plain { max-width: 66ch; padding-left: 1.15rem; margin: 0 0 1rem; }
+  ul.plain li, ol.plain li { margin-bottom: .45rem; }
+
+  /* ---------- korostuslaatikot ---------- */
+
+  .note {
+    border-left: 3px solid var(--steel);
+    background: var(--steel-bg);
+    padding: 1rem 1.125rem;
+    margin: 1.5rem 0;
+    max-width: 66ch;
+  }
+
+  .note p:last-child { margin-bottom: 0; }
+
+  .note-label {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--steel);
+    display: block;
+    margin-bottom: .35rem;
+  }
+
+  /* ---------- lukuruudut ---------- */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 1.75rem 0;
+  }
+
+  @media (min-width: 56rem) {
+    .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  .stat { background: var(--surface); padding: 1rem 1.125rem; }
+
+  .stat-value {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.875rem;
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  .stat-unit { font-size: .9375rem; font-weight: 600; color: var(--ink-2); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    line-height: 1.45;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: block;
+    margin-top: .5rem;
+  }
+
+  /* ---------- kaaviot ---------- */
+
+  .chart {
+    margin: 1.75rem 0;
+    padding: 1.25rem 1.25rem 1rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+  }
+
+  .chart-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    display: block;
+    margin-bottom: .125rem;
+  }
+
+  .chart-sub {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    letter-spacing: .05em;
+    color: var(--ink-3);
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .bars { display: flex; flex-direction: column; gap: .5rem; }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr) 4.25rem;
+    align-items: center;
+    gap: .75rem;
+    border: 0;
+    background: none;
+    padding: .1875rem .25rem;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: default;
+    width: 100%;
+  }
+
+  .bar-row:hover, .bar-row:focus-visible { background: var(--accent-bg); }
+
+  .bar-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: .9375rem;
+    line-height: 1.25;
+  }
+
+  .bar-tag {
+    font-family: var(--mono);
+    font-weight: 400;
+    font-size: .625rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-left: .3rem;
+    white-space: nowrap;
+  }
+
+  .bar-track { height: 15px; background: var(--line); position: relative; }
+
+  .bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--w);
+    background: var(--bar);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .bar-fill.is-estimate {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--bar) 0 4px,
+      color-mix(in srgb, var(--bar) 45%, transparent) 4px 8px
+    );
+  }
+
+  .bar-value {
+    font-family: var(--mono);
+    font-size: .8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--ink-2);
+  }
+
+  .chart-readout {
+    margin: .875rem 0 0;
+    padding-top: .75rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: .75rem;
+    line-height: 1.5;
+    color: var(--ink-2);
+    min-height: 2.25em;
+    max-width: none;
+  }
+
+  .chart-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: .75rem;
+    font-family: var(--mono);
+    font-size: .6875rem;
+    color: var(--ink-3);
+  }
+
+  .key-item { display: flex; align-items: center; gap: .4rem; }
+
+  .key-swatch { width: 14px; height: 10px; background: var(--bar); flex: none; }
+
+  .key-swatch.is-estimate {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--bar) 0 3px,
+      color-mix(in srgb, var(--bar) 45%, transparent) 3px 6px
+    );
+  }
+
+  /* ---------- arvoketju ---------- */
+
+  .chain {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 1.5rem 0 .75rem;
+  }
+
+  .chain-step { background: var(--surface-2); padding: .875rem 1rem; }
+
+  .chain-step .kicker { color: var(--accent); }
+
+  .chain-step h4 { margin-top: .3rem; font-size: 1rem; }
+
+  .chain-step p {
+    margin: .25rem 0 0;
+    font-size: .875rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .chain-note {
+    font-family: var(--mono);
+    font-size: .75rem;
+    color: var(--ink-3);
+    margin: 0 0 1.5rem;
+  }
+
+  /* ---------- kortit ---------- */
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin: 1.5rem 0;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 1.125rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card .kicker { color: var(--steel); }
+
+  .card h4 { margin-top: .35rem; }
+
+  .card p { font-size: .9375rem; line-height: 1.5; margin: .35rem 0 0; max-width: none; }
+
+  .card dl {
+    margin: .875rem 0 0;
+    padding-top: .75rem;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .25rem .625rem;
+    font-size: .8125rem;
+  }
+
+  .card dt {
+    font-family: var(--mono);
+    font-size: .6875rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: .1rem;
+  }
+
+  .card dd { margin: 0; color: var(--ink-2); }
+
+  /* ---------- sanasto ---------- */
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .625rem;
+    align-items: center;
+    margin: 1.5rem 0 1.25rem;
+  }
+
+  .search {
+    flex: 1 1 14rem;
+    min-width: 0;
+    padding: .5rem .75rem;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: .8125rem;
+    border-radius: 2px;
+  }
+
+  .search::placeholder { color: var(--ink-3); }
+
+  .chip {
+    padding: .4rem .75rem;
+    border: 1px solid var(--line-strong);
+    background: none;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    font-size: .6875rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .chip[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--surface);
+  }
+
+  .terms { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+
+  .term {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: .25rem 1.25rem;
+    padding: .875rem .25rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .term-name { font-family: var(--display); font-weight: 600; font-size: 1rem; }
+
+  .term-cat {
+    font-family: var(--mono);
+    font-size: .625rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: block;
+    margin-top: .15rem;
+  }
+
+  .term-def { font-size: .9375rem; line-height: 1.55; color: var(--ink-2); }
+
+  .empty {
+    font-family: var(--mono);
+    font-size: .8125rem;
+    color: var(--ink-3);
+    padding: 1.5rem .25rem;
+  }
+
+  /* ---------- visa ---------- */
+
+  .quiz-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    align-items: baseline;
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: .75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .quiz-score { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .question { margin-bottom: 2rem; }
+
+  .question:last-of-type { margin-bottom: 1rem; }
+
+  .q-text {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.3;
+    margin: 0 0 .75rem;
+    max-width: 60ch;
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: .75rem;
+    color: var(--ink-3);
+    margin-right: .5rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .options { display: flex; flex-direction: column; gap: .375rem; max-width: 48rem; }
+
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: .625rem;
+    width: 100%;
+    padding: .625rem .875rem;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: .9375rem;
+    line-height: 1.45;
+    text-align: left;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .option:hover:not(:disabled) { border-color: var(--ink-3); background: var(--surface-2); }
+
+  .option:disabled { cursor: default; }
+
+  .option-mark {
+    font-family: var(--mono);
+    font-size: .75rem;
+    color: var(--ink-3);
+    padding-top: .15rem;
+    flex: none;
+    width: 1.1rem;
+  }
+
+  .option[data-state="correct"] {
+    border-color: #2f7d52;
+    background: color-mix(in srgb, #2f7d52 10%, var(--surface));
+  }
+
+  .option[data-state="correct"] .option-mark { color: #2f7d52; }
+
+  .option[data-state="wrong"] {
+    border-color: #b1413b;
+    background: color-mix(in srgb, #b1413b 10%, var(--surface));
+  }
+
+  .option[data-state="wrong"] .option-mark { color: #b1413b; }
+
+  .explain {
+    margin: .75rem 0 0;
+    padding: .75rem .875rem;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    font-size: .9375rem;
+    line-height: 1.5;
+    max-width: 48rem;
+  }
+
+  .quiz-result {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.375rem;
+    border: 2px solid var(--ink);
+    max-width: 48rem;
+  }
+
+  .quiz-result h3 { margin-top: 0; }
+
+  /* ---------- painikkeet ---------- */
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--surface);
+    font-family: var(--mono);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  .button.is-ghost { background: none; color: var(--ink); }
+
+  .button:hover { opacity: .85; }
+
+  .sheet-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .foot-hint { font-family: var(--mono); font-size: .6875rem; color: var(--ink-3); margin: 0; }
+
+  /* ---------- alatunniste ---------- */
+
+  .colophon {
+    max-width: 74rem;
+    margin: 0 auto;
+    padding-inline: 1.25rem;
+    padding-block: 0 3rem;
+    color: var(--ink-3);
+  }
+
+  .colophon-inner { border-top: 1px solid var(--line-strong); padding-top: 1.25rem; }
+
+  .colophon h3 { margin-top: 0; font-size: 1rem; color: var(--ink-2); }
+
+  .sources {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: .5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: .75rem;
+    line-height: 1.5;
+  }
+
+  .colophon a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  .colophon a:hover { color: var(--ink); }
+
+  .disclaimer { font-family: var(--mono); font-size: .6875rem; margin: 1.25rem 0 0; max-width: 70ch; }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  /* ---------- kapea näyttö ---------- */
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding-block: 1.5rem 0; }
+
+    .rail { position: static; }
+
+    .rail-list {
+      flex-direction: row;
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .rail-list li { flex: none; }
+
+    .rail-link {
+      grid-template-columns: auto auto;
+      border-bottom: 0;
+      padding: .625rem .875rem;
+      white-space: nowrap;
+    }
+
+    .rail-link[aria-current="true"] { box-shadow: inset 0 -2px 0 var(--accent); }
+
+    .rail-tick { display: none; }
+
+    .sheet { padding: 1.75rem 1.25rem 2rem; }
+
+    .term { grid-template-columns: minmax(0, 1fr); }
+
+    .bar-row { grid-template-columns: minmax(0, 1fr) 4rem; grid-template-areas: "name value" "track track"; }
+
+    .bar-name { grid-area: name; }
+    .bar-value { grid-area: value; }
+    .bar-track { grid-area: track; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="rail" aria-label="Kurssin osat">
+    <div class="rail-head">
+      <span class="kicker">Oppimateriaali · 2026</span>
+      <h1 class="rail-title">Puolustusalan peruskurssi</h1>
+      <div class="progress">
+        <span class="progress-track"><span class="progress-fill" id="progress-fill"></span></span>
+        <span class="progress-text" id="progress-text">0/6</span>
+      </div>
+    </div>
+    <ul class="rail-list" id="rail-list"></ul>
+  </nav>
+
+  <main id="main">
+
+    <!-- OSA 1 -->
+    <section class="sheet" id="osa-1" data-title="Miten ala toimii">
+      <header class="sheet-head">
+        <span class="kicker">Osa 1 / 6 · Perusteet</span>
+        <h2>Miten ala toimii</h2>
+        <p class="standfirst">Puolustusteollisuus ei myy tuotteita kuluttajille. Se myy suorituskykyä valtioille, vuosikymmeniksi kerrallaan. Tästä seuraa lähes kaikki muu.</p>
+      </header>
+
+      <p>Jos ymmärrät kolme asiaa, ymmärrät alan logiikan: <strong>kuka ostaa</strong>, <strong>mitä oikeasti ostetaan</strong> ja <strong>kuinka kauan kauppa kestää</strong>.</p>
+
+      <h3>1. Asiakkaita on vähän, ja ne ovat valtioita</h3>
+      <p>Lähes kaikki myynti menee valtioille tai niiden valtuuttamille ostajille. Kysyntä ei synny siitä, että tuote on hyvä, vaan siitä että jokin hallitus päättää budjetissaan ostaa sen. Siksi alaa luetaan politiikan kautta: uhkakuva muuttuu → budjetti muuttuu → tilaukset muuttuvat. Viive näiden välillä on vuosia.</p>
+      <p>Sama pätee toisin päin: yritys ei voi vain päättää myydä haluamalleen asiakkaalle. Jokainen vientikauppa tarvitsee oman maan vientiluvan, ja usein myös komponenttien alkuperämaan luvan.</p>
+
+      <h3>2. Ostetaan suorituskykyä, ei laitetta</h3>
+      <p>Kun valtio hankkii hävittäjän, se ei osta lentokonetta. Se ostaa kyvyn pitää ilmatila hallinnassa 30–40 vuotta: koneet, varaosat, aseet, simulaattorit, koulutuksen, huolto-organisaation ja ohjelmistopäivitykset. Ostohinta on vain osa laskua &ndash; elinkaaren aikana käyttö ja ylläpito maksavat tyypillisesti selvästi enemmän kuin itse hankinta.</p>
+      <p>Tämä selittää, miksi toimittajan vaihtaminen on niin vaikeaa. Kun järjestelmä on valittu, siihen on sidottu huolto, koulutus ja varaosaketju vuosikymmeniksi. Ala myy pitkiä suhteita, ei kertakauppoja.</p>
+
+      <h3>3. Arvoketju: kuka tekee mitäkin</h3>
+
+      <div class="chain">
+        <div class="chain-step">
+          <span class="kicker">Tilaaja</span>
+          <h4>Valtio</h4>
+          <p>Määrittelee tarpeen, kilpailuttaa, rahoittaa ja omistaa. Suomessa Puolustusvoimat ja puolustusministeriö.</p>
+        </div>
+        <div class="chain-step">
+          <span class="kicker">Taso 0</span>
+          <h4>Pääurakoitsija</h4>
+          <p>&rdquo;Prime&rdquo;. Vastaa kokonaisuudesta asiakkaalle ja kokoaa sen alihankkijoiden osista. Esim. Lockheed Martin, Patria.</p>
+        </div>
+        <div class="chain-step">
+          <span class="kicker">Taso 1</span>
+          <h4>Järjestelmätoimittaja</h4>
+          <p>Toimittaa isoja kokonaisuuksia: moottorin, tutkan, asejärjestelmän, viestivälineet.</p>
+        </div>
+        <div class="chain-step">
+          <span class="kicker">Taso 2–3</span>
+          <h4>Komponentit</h4>
+          <p>Piirilevyt, optiikka, erikoisteräs, ruuti, liittimet. Täällä on tuhansia pk-yrityksiä &ndash; ja pullonkaulat.</p>
+        </div>
+      </div>
+      <p class="chain-note">→ Raha kulkee vasemmalta oikealle. Pullonkaulat syntyvät melkein aina oikealta vasemmalle.</p>
+
+      <p>Suomalainen esimerkki ketjusta: Suomi ostaa F-35-hävittäjät Lockheed Martinilta, mutta osana kauppaa <strong>Patria valmistaa koneiden eturunkoja Suomessa</strong>. Ostava maa on siis samalla toimitusketjun osa. Tätä kutsutaan teolliseksi osallistumiseksi, ja se on tavallinen ehto isoissa hankinnoissa.</p>
+
+      <h3>4. Hankinta kestää vuosia &ndash; ja se on tarkoituskin</h3>
+      <ol class="plain">
+        <li><strong>Tarvemäärittely.</strong> Mitä puolustusvoimat tarvitsee ja mihin uhkaan.</li>
+        <li><strong>Tietopyyntö (RFI).</strong> Mitä markkinoilla on olemassa?</li>
+        <li><strong>Tarjouspyyntö (RFP).</strong> Tarkat vaatimukset, joihin toimittajat vastaavat.</li>
+        <li><strong>Vertailu ja testit.</strong> Suorituskyky, hinta, huoltovarmuus, turvallisuuspolitiikka.</li>
+        <li><strong>Sopimus ja toimitus.</strong> Yleensä porrastettuna monen vuoden ajalle.</li>
+        <li><strong>Elinkaari.</strong> Huolto, päivitykset, varaosat &ndash; seuraavat 30+ vuotta.</li>
+      </ol>
+      <p>Suomen hävittäjähankinnassa vaiheet 1–5 veivät noin kymmenen vuotta: esiselvitykset alkoivat 2010-luvun alussa, päätös tuli joulukuussa 2021 ja ensimmäiset koneet saapuvat Suomeen 2026.</p>
+
+      <div class="note">
+        <span class="note-label">Tärkein yksittäinen luku</span>
+        <p><strong>Tilauskanta</strong> (engl. <em>order backlog</em>) kertoo alasta enemmän kuin liikevaihto. Se on jo sovittujen, vielä toimittamattomien kauppojen arvo &ndash; eli näkymä tuleviin vuosiin. Kun saksalaisen Rheinmetallin tilauskanta oli vuoden 2025 lopussa 64 miljardia euroa ja liikevaihto 9,9 miljardia, tilauskirja vastasi noin kuutta vuotta myyntiä. Patrian tilauskanta oli samaan aikaan ennätykselliset 3,5 miljardia euroa.</p>
+      </div>
+
+      <h3>5. Säännöt, jotka rajaavat kaiken</h3>
+      <ul class="plain">
+        <li><strong>Vientilupa.</strong> Jokainen maa päättää itse, kenelle sen yritykset saavat myydä. Lupa voidaan myös perua kesken kaiken.</li>
+        <li><strong>ITAR.</strong> Yhdysvaltain säännöstö, joka seuraa amerikkalaista teknologiaa mukana. Jos laitteessa on ITAR-osia, USA voi estää sen jälleenviennin &ndash; vaikka laite olisi tehty Euroopassa.</li>
+        <li><strong>Kaksikäyttötuotteet.</strong> Moni siviilituote (drone, lämpökamera, salausohjelmisto) on myös sotilaskäyttöinen ja siksi luvanvarainen.</li>
+        <li><strong>Salassapito.</strong> Ostaja ei useinkaan saa lähdekoodia tai kaikkia huolto-oikeuksia. Tämä on yksi syy, miksi kotimaista osaamista halutaan ylläpitää.</li>
+      </ul>
+
+      <h3>6. Mikä on juuri nyt muuttumassa</h3>
+      <p>Ukrainan sota rikkoi alan vanhan rytmin. Perinteinen malli &ndash; pieni määrä erittäin kalliita, pitkään kehitettyjä järjestelmiä &ndash; törmäsi sotaan, jossa kuluu satojatuhansia halpoja droneja ja miljoonia kranaatteja vuodessa. Rinnalle on syntynyt uusi toimijaryhmä: ohjelmisto&shy;vetoiset puolustusteknologia&shy;yritykset, jotka päivittävät tuotettaan viikoissa eivätkä vuosikymmenissä.</p>
+      <p>Kumpikin malli jää. Sukellusvenettä ei tehdä ketterästi, eikä FPV-dronea kymmenen vuoden ohjelmana. Alaa kannattaa siksi katsoa kahtena eri liiketoimintana, joilla on eri kellotaajuus.</p>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-1">Merkitse luetuksi</button>
+        <p class="foot-hint">Seuraavaksi: paljonko maailmassa oikeasti käytetään rahaa.</p>
+      </div>
+    </section>
+
+    <!-- OSA 2 -->
+    <section class="sheet" id="osa-2" data-title="Markkina numeroina" hidden>
+      <header class="sheet-head">
+        <span class="kicker">Osa 2 / 6 · Markkina</span>
+        <h2>Markkina numeroina</h2>
+        <p class="standfirst">Maailman sotilasmenot ovat kasvaneet yhtäjaksoisesti yli kymmenen vuotta. Vuonna 2025 kasvu tuli Euroopasta ja Aasiasta &ndash; ei Yhdysvalloista.</p>
+      </header>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value">2&nbsp;887<span class="stat-unit"> mrd&nbsp;$</span></span>
+          <span class="stat-label">Maailman sotilasmenot 2025</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">+2,9<span class="stat-unit"> %</span></span>
+          <span class="stat-label">Reaalikasvu · 11. vuosi peräkkäin</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">2,5<span class="stat-unit"> %</span></span>
+          <span class="stat-label">Osuus maailman BKT:stä</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">51<span class="stat-unit"> %</span></span>
+          <span class="stat-label">Kolmen suurimman yhteinen osuus</span>
+        </div>
+      </div>
+
+      <h3>Kuka käyttää eniten</h3>
+
+      <figure class="chart">
+        <figcaption>
+          <span class="chart-title">Viisi suurinta sotilasmenojen käyttäjää, 2025</span>
+          <span class="chart-sub">Miljardia Yhdysvaltain dollaria · lähde: SIPRI</span>
+        </figcaption>
+        <div class="bars" data-readout="readout-spenders">
+          <button class="bar-row" type="button" data-note="Yhdysvallat: 33 % maailman sotilasmenoista. Menot laskivat 7,5 % edellisvuodesta – ainoa suuri laskija kärjessä.">
+            <span class="bar-name">Yhdysvallat</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:100%"></span></span>
+            <span class="bar-value">954</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Kiina: 12 % maailman menoista ja maailman toiseksi suurin jo yli kahden vuosikymmenen ajan.">
+            <span class="bar-name">Kiina</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:35.2%"></span></span>
+            <span class="bar-value">336</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Venäjä: 6,6 % maailman menoista. Luku on SIPRIn arvio – Venäjän oma budjettiraportointi ei ole läpinäkyvää.">
+            <span class="bar-name">Venäjä</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:19.9%"></span></span>
+            <span class="bar-value">190</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Saksa: noussut Euroopan suurimmaksi käyttäjäksi. Euroopan menot kasvoivat 2025 yhteensä 14 %.">
+            <span class="bar-name">Saksa</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:11.9%"></span></span>
+            <span class="bar-value">114</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Intia: Aasian ja Oseanian menot kasvoivat 2025 yhteensä 8,1 %.">
+            <span class="bar-name">Intia</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:9.6%"></span></span>
+            <span class="bar-value">92</span>
+          </button>
+        </div>
+        <p class="chart-readout" id="readout-spenders">Vie hiiri palkin päälle tai valitse se näppäimistöllä &ndash; saat lisätiedon tähän.</p>
+      </figure>
+
+      <p>Sijat 6–10 vuonna 2025 olivat Britannia, Ukraina, Saudi-Arabia, Ranska ja Japani. Ukrainan luku on listan poikkeuksellisin: <strong>84,1 miljardia dollaria eli noin 40 % maan bruttokansantuotteesta</strong>. Vertailun vuoksi Suomen vastaava osuus on noin 2,5 %.</p>
+
+      <h3>Kuka myy</h3>
+      <p>Maailman sadan suurimman puolustusyhtiön yhteenlaskettu asemyynti oli <strong>679 miljardia dollaria vuonna 2024</strong>, 5,9 % edellisvuotta enemmän. Yhdysvaltalaisten yhtiöiden osuus oli 334 miljardia eli lähes puolet koko listasta &ndash; 39 yhtiötä sadasta.</p>
+      <p>Kärjessä on ollut vuosikaudet sama yhtiö: <strong>Lockheed Martin</strong>, jonka asemyynti oli noin 65 miljardia dollaria. Seuraavina tulevat RTX, Northrop Grumman (37,9 mrd $), General Dynamics ja Boeing. Euroopasta suurimmat ovat BAE Systems, Airbus, Leonardo, Thales ja nopeimmin kasvavana Rheinmetall.</p>
+
+      <div class="note">
+        <span class="note-label">Miten lukuja luetaan oikein</span>
+        <p>&rdquo;Asemyynti&rdquo; ei ole sama kuin yhtiön liikevaihto. Esimerkiksi Airbus ja Boeing myyvät pääosin siviilikoneita, joten niiden asemyynti on vain osa kokonaisuudesta. Kun vertailet yhtiöitä, varmista aina kumpaa lukua katsot.</p>
+      </div>
+
+      <h3>Euroopan käänne</h3>
+      <p>Euroopan puolustusmenot kasvoivat vuonna 2025 noin <strong>14 %</strong>. Kasvu ei ole pelkkää budjettipuhetta, vaan näkyy tehtaissa. Selvin mittari on 155 millimetrin tykistön&shy;ammus &ndash; Naton käytännön standardikaliiperi ja se hyödyke, josta Ukrainan sodassa on ollut jatkuva pula.</p>
+
+      <figure class="chart">
+        <figcaption>
+          <span class="chart-title">Euroopan 155&nbsp;mm ammustuotanto</span>
+          <span class="chart-sub">Ammusta vuodessa · arviot vaihtelevat lähteittäin</span>
+        </figcaption>
+        <div class="bars" data-readout="readout-ammo">
+          <button class="bar-row" type="button" data-note="Ennen täysimittaisen sodan alkua Euroopan tuotanto oli noin 300 000–400 000 ammusta vuodessa – rauhanajan taso.">
+            <span class="bar-name">Ennen 2022</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:14.6%"></span></span>
+            <span class="bar-value">~350 t.</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Vuoden 2025 lopussa yhteenlaskettu eurooppalainen tuotanto oli noin 1,2–1,3 miljoonaa ammusta vuodessa.">
+            <span class="bar-name">2025 lopussa</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:52.1%"></span></span>
+            <span class="bar-value">~1,25 M</span>
+          </button>
+          <button class="bar-row" type="button" data-note="Arvio tuotantokatosta, kun tehdyt investoinnit ovat täydessä käytössä. Kyse on kapasiteetista, ei toteutuneesta tuotannosta.">
+            <span class="bar-name">2026 katto <span class="bar-tag">arvio</span></span>
+            <span class="bar-track"><span class="bar-fill is-estimate" style="--w:100%"></span></span>
+            <span class="bar-value">~2,4 M</span>
+          </button>
+        </div>
+        <div class="chart-key">
+          <span class="key-item"><span class="key-swatch"></span> Toteutunut tuotanto</span>
+          <span class="key-item"><span class="key-swatch is-estimate"></span> Arvioitu kapasiteetti</span>
+        </div>
+        <p class="chart-readout" id="readout-ammo">Vie hiiri palkin päälle tai valitse se näppäimistöllä &ndash; saat lisätiedon tähän.</p>
+      </figure>
+
+      <p>Käytännössä tämä tarkoittaa uusia tehtaita: Rheinmetall rakentaa Ala-Saksin Unterlüßiin Euroopan suurinta ammustehdasta, sen Espanjan-tehdas tekee noin 450 000 ammusta vuodessa, ja KNDS avasi Belgiassa uuden 155 mm -tuotantolinjan. Tuotantomäärä on nykyään yhtä tärkeä suorituskyky kuin itse ase.</p>
+
+      <h3>Mistä raha tulee</h3>
+      <ul class="plain">
+        <li><strong>Naton 5 %:n tavoite.</strong> Haagin huippukokouksessa kesäkuussa 2025 jäsenmaat sitoutuivat nostamaan puolustukseen ja turvallisuuteen liittyvät menot 5 %:iin BKT:stä vuoteen 2035 mennessä. Luku jakautuu kahtia: <strong>vähintään 3,5 % varsinaiseen puolustukseen</strong> ja <strong>enintään 1,5 % kriittiseen infraan, kyberpuolustukseen, varautumiseen ja puolustusteollisuuden vahvistamiseen</strong>. Espanja sai poikkeuksen, ja edistymistä tarkastellaan 2029.</li>
+        <li><strong>EU:n Readiness 2030 (ent. ReArm Europe).</strong> Komission maaliskuussa 2025 esittämä kokonaisuus, jolla tavoitellaan jopa 800 miljardin euron panostusta.</li>
+        <li><strong>SAFE.</strong> Ensimmäinen toteutunut osa: EU:n budjetin takaama <strong>150 miljardin euron lainaväline</strong> jäsenmaille. Raha on korvamerkitty yhteishankintoihin, joissa on mukana vähintään kaksi maata &ndash; tarkoitus on ostaa isompina erinä ja saada joukot käyttämään yhteensopivaa kalustoa.</li>
+        <li><strong>EDIP.</strong> Eurooppalainen puolustusteollisuus&shy;ohjelma, jolla tuetaan tuotantokapasiteetin rakentamista.</li>
+      </ul>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-2">Merkitse luetuksi</button>
+        <p class="foot-hint">Seuraavaksi: mitä näillä rahoilla ostetaan.</p>
+      </div>
+    </section>
+
+    <!-- OSA 3 -->
+    <section class="sheet" id="osa-3" data-title="Teknologiat" hidden>
+      <header class="sheet-head">
+        <span class="kicker">Osa 3 / 6 · Teknologia</span>
+        <h2>Mitä oikeasti ostetaan</h2>
+        <p class="standfirst">Ala jakautuu viiteen toimintaympäristöön ja yhteen läpileikkaavaan kerrokseen, joka sitoo ne yhteen. Suurin muutos ei ole yksittäinen ase vaan se, kuinka halvaksi vaikuttaminen on tullut.</p>
+      </header>
+
+      <h3>Viisi toimintaympäristöä</h3>
+      <p>Puolustusvoimat jäsentävät maailmaa toimintaympäristöinä: <strong>maa, meri, ilma, avaruus ja kyber</strong>. Jokaisella on omat järjestelmänsä, omat toimittajansa ja oma aikajänteensä. Niiden päällä kulkee kerros nimeltä <strong>C4ISR</strong> &ndash; johtaminen, viestintä, tietokoneet, tiedustelu ja valvonta. Se on se osa, joka muuttaa havainnon päätökseksi ja päätöksen vaikutukseksi.</p>
+
+      <div class="note">
+        <span class="note-label">Ketju, jota kaikki yrittävät nopeuttaa</span>
+        <p><strong>Havaitse → tunnista → päätä → vaikuta → arvioi.</strong> Nykyaikainen puolustusteknologia on pohjimmiltaan kilpailu siitä, kuka suorittaa tämän silmukan nopeammin. Tutka, drone, radio, tekoäly ja tykki ovat kaikki saman ketjun osia.</p>
+      </div>
+
+      <h3>Kymmenen teknologiaa, jotka kannattaa tuntea</h3>
+
+      <div class="cards">
+        <article class="card">
+          <span class="kicker">Ilma · maa</span>
+          <h4>Miehittämättömät ilma-alukset</h4>
+          <p>Droneista on tullut sekä silmät että ase. FPV-drone on lennokki, jota ohjataan kameran kuvan kautta suoraan maaliin. Halpa, kuluva ja valmistettavissa lähes missä tahansa.</p>
+          <dl>
+            <dt>Miksi</dt><dd>Muuttaa tiedustelun ja tarkkuustulen hinnan murto-osaan entisestä.</dd>
+            <dt>Suomessa</dt><dd>Insta kehitti Steel Eagle ER -dronen.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Vastatoimi</span>
+          <h4>Dronetorjunta (C-UAS)</h4>
+          <p>Kolme kerrosta: havaitseminen (tutka, radiotiedustelu, akustiikka), häirintä ja kineettinen torjunta. Uusinta on drone dronea vastaan &ndash; sieppaajalennokki.</p>
+          <dl>
+            <dt>Ongelma</dt><dd>Kustannusvaihto: satojen eurojen dronea ei kannata torjua satojen tuhansien ohjuksella.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Sähkömagneettinen</span>
+          <h4>Elektroninen sodankäynti</h4>
+          <p>Radioyhteyksien ja satelliittipaikannuksen häirintä ja harhautus. Sekä hyökkäys että suoja: sama laite voi estää dronen ohjauksen ja suojata omaa joukkoa.</p>
+          <dl>
+            <dt>Luonne</dt><dd>Vaikutus on paikallinen ja tilapäinen. Kilpavarustelu on jatkuvaa, ei kertaratkaisu.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Maa</span>
+          <h4>Tykistö ja ampumatarvikkeet</h4>
+          <p>155 mm on Naton standardikaliiperi. Moderni panssarihaupitsi ampuu ja siirtyy minuuteissa, koska paikallaan pysyvä tykki paikannetaan vastatykistötutkalla.</p>
+          <dl>
+            <dt>Pullonkaula</dt><dd>Ruuti, nitroselluloosa ja koneistuskapasiteetti &ndash; ei tykkien määrä.</dd>
+            <dt>Suomessa</dt><dd>K9 Moukari, Nammon ammustuotanto.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Ilma</span>
+          <h4>Kerroksellinen ilmapuolustus</h4>
+          <p>Eri uhkia torjutaan eri hinnalla ja eri etäisyydeltä: lyhyt kantama droneja vastaan, keskipitkä lentokoneita vastaan, pitkä ballistisia ohjuksia vastaan.</p>
+          <dl>
+            <dt>Esimerkki</dt><dd>Suomen hankkima David&rsquo;s Sling yltää noin 300 km päähän ja 30 km korkeuteen.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Ilma</span>
+          <h4>Viides ja kuudes sukupolvi</h4>
+          <p>F-35:n arvo ei ole nopeudessa vaan häiveessä ja sensorifuusiossa: kone kerää ja jakaa tilannekuvaa koko verkolle. Seuraava sukupolvi (GCAP, FCAS) rakentuu miehittämättömien siipimiesten ympärille.</p>
+          <dl>
+            <dt>Suomessa</dt><dd>64 konetta, ensimmäiset 2026.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Avaruus</span>
+          <h4>Satelliitit</h4>
+          <p>Kuvaus, viestintä ja paikannus. Ukrainan sota osoitti, että kaupallinen satelliittiyhteys voi olla sotilaallisesti ratkaiseva &ndash; ja että sen omistaja saa siten valtaa.</p>
+          <dl>
+            <dt>Haavoittuvuus</dt><dd>GPS-häirintä ja -harhautus on arkipäivää myös Itämerellä.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Kyber</span>
+          <h4>Johtamisjärjestelmät ja kyberturva</h4>
+          <p>Taktiset radiot, salatut verkot ja tilannekuvajärjestelmät. Vähiten näkyvä ja eniten kasvava osa alaa &ndash; ja se, johon ohjelmistoyritykset pääsevät mukaan.</p>
+          <dl>
+            <dt>Suomessa</dt><dd>Bittium (taktiset radiot), Insta (kyber ja johtaminen).</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Läpileikkaava</span>
+          <h4>Tekoäly ja autonomia</h4>
+          <p>Käytännössä tämä tarkoittaa tänään kohteen tunnistamista kuvasta, reitin valintaa häirinnässä ja datamassan suodattamista päättäjälle &ndash; ei itsenäisesti sotivia robotteja.</p>
+          <dl>
+            <dt>Kiistakysymys</dt><dd>Kuinka paljon ihminen pysyy päätössilmukassa.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Meri</span>
+          <h4>Merenalainen ulottuvuus</h4>
+          <p>Sukellusveneet, miinantorjunta ja miehittämättömät pinta- ja vedenalaiset alukset. Itämerellä painopiste on kaapeleiden ja putkien suojaamisessa.</p>
+          <dl>
+            <dt>Ilmiö</dt><dd>Hybridivaikuttaminen: vahinko näyttää onnettomuudelta.</dd>
+          </dl>
+        </article>
+      </div>
+
+      <h3>Kustannusvaihto &ndash; alan tärkein uusi käsite</h3>
+      <p>Jos torjuntaan käytetty ohjus maksaa moninkertaisesti sen verran kuin torjuttava kohde, puolustaja häviää taloudellisesti vaikka voittaisi jokaisen yksittäisen kohtaamisen. Tämä on syy siihen, miksi halvat torjuntakeinot &ndash; häirintä, tykkitorjunta, sieppaajadronet &ndash; ovat nyt alan kuumin kehityskohde.</p>
+      <p>Sama logiikka toimii toisin päin: halpa hyökkäysväline pakottaa vastustajan kuluttamaan kallista puolustusta. Suuruusluokat kannattaa pitää mielessä, vaikka tarkat hinnat vaihtelevat: yksinkertainen hyökkäysdrone maksaa satoja tai tuhansia euroja, ilmatorjuntaohjus sadoista tuhansista miljooniin.</p>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-3">Merkitse luetuksi</button>
+        <p class="foot-hint">Seuraavaksi: missä Suomi on tässä kokonaisuudessa.</p>
+      </div>
+    </section>
+
+    <!-- OSA 4 -->
+    <section class="sheet" id="osa-4" data-title="Suomi" hidden>
+      <header class="sheet-head">
+        <span class="kicker">Osa 4 / 6 · Suomi</span>
+        <h2>Suomi ja suomalainen ala</h2>
+        <p class="standfirst">Pieni maa, iso puolustus ja teollisuus, joka on parissa vuodessa muuttunut kotimarkkinan toimittajasta vientialaksi.</p>
+      </header>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value">6,3<span class="stat-unit"> mrd&nbsp;€</span></span>
+          <span class="stat-label">Puolustusbudjetti 2026</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">2,5<span class="stat-unit"> %</span></span>
+          <span class="stat-label">Arvioitu osuus BKT:stä 2026</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">4,2<span class="stat-unit"> mrd&nbsp;€</span></span>
+          <span class="stat-label">Alan liikevaihto Suomessa 2025</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">55<span class="stat-unit"> %</span></span>
+          <span class="stat-label">Liikevaihdosta vientiä</span>
+        </div>
+      </div>
+
+      <h3>Mihin 6,3 miljardia menee</h3>
+      <ul class="plain">
+        <li><strong>2,6 mrd €</strong> &ndash; Puolustusvoimien toimintamenot: palkat, harjoitukset, kiinteistöt, polttoaine.</li>
+        <li><strong>1,5 mrd €</strong> &ndash; puolustusmateriaalin hankinta.</li>
+        <li><strong>1,4 mrd €</strong> &ndash; monitoimihävittäjien hankinta, joka on oma erillinen kokonaisuutensa.</li>
+      </ul>
+      <p>Lisäksi vuoden 2026 budjettiin sisältyy kaksi <strong>tilausvaltuutta</strong> eli oikeutta sitoutua tuleviin vuosiin kohdistuviin kauppoihin: noin 4 miljardia euroa maavoimien liikkuvuuteen ja 2 miljardia yhteisiin asejärjestelmiin ja ampumatarvikkeisiin. Tilausvaltuus on suomalaisen puolustusbudjetin ymmärtämisen avain: vuosibudjetti kertoo kassasta, tilausvaltuus kertoo suunnasta.</p>
+
+      <h3>Menojen kehitys</h3>
+
+      <figure class="chart">
+        <figcaption>
+          <span class="chart-title">Suomen puolustusmenot suhteessa BKT:hen</span>
+          <span class="chart-sub">Naton laskentatavan mukaan · % bruttokansantuotteesta</span>
+        </figcaption>
+        <div class="bars" data-readout="readout-fi">
+          <button class="bar-row" type="button" data-note="2021: viimeinen vuosi ennen Venäjän täysimittaista hyökkäystä Ukrainaan ja Suomen Nato-hakemusta.">
+            <span class="bar-name">2021</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:40%"></span></span>
+            <span class="bar-value">1,4 %</span>
+          </button>
+          <button class="bar-row" type="button" data-note="2023: Suomi liittyi Natoon huhtikuussa 2023. Menot olivat jo ylittäneet Naton silloisen 2 %:n tavoitteen.">
+            <span class="bar-name">2023</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:60%"></span></span>
+            <span class="bar-value">2,1 %</span>
+          </button>
+          <button class="bar-row" type="button" data-note="2024: hävittäjähankinnan maksuerät nostavat osuutta näinä vuosina.">
+            <span class="bar-name">2024</span>
+            <span class="bar-track"><span class="bar-fill" style="--w:68.6%"></span></span>
+            <span class="bar-value">2,4 %</span>
+          </button>
+          <button class="bar-row" type="button" data-note="2026: budjettiesityksen arvio. Suurimmat korotukset on ajoitettu vuosille 2028–2029.">
+            <span class="bar-name">2026 <span class="bar-tag">arvio</span></span>
+            <span class="bar-track"><span class="bar-fill is-estimate" style="--w:71.4%"></span></span>
+            <span class="bar-value">2,5 %</span>
+          </button>
+          <button class="bar-row" type="button" data-note="2029: hallituksen linjaama tavoite. Puolustusministeriön määrärahan on suunniteltu kasvavan reaalisesti noin 14 % sekä 2028 että 2029.">
+            <span class="bar-name">2029 <span class="bar-tag">tavoite</span></span>
+            <span class="bar-track"><span class="bar-fill is-estimate" style="--w:85.7%"></span></span>
+            <span class="bar-value">≥3,0 %</span>
+          </button>
+          <button class="bar-row" type="button" data-note="2035: Naton Haagin päätöksen mukainen ydinpuolustuksen vähimmäistaso. Päälle tulee enintään 1,5 % infraa ja varautumista.">
+            <span class="bar-name">2035 <span class="bar-tag">Nato-vaade</span></span>
+            <span class="bar-track"><span class="bar-fill is-estimate" style="--w:100%"></span></span>
+            <span class="bar-value">3,5 %</span>
+          </button>
+        </div>
+        <div class="chart-key">
+          <span class="key-item"><span class="key-swatch"></span> Toteutunut</span>
+          <span class="key-item"><span class="key-swatch is-estimate"></span> Arvio tai tavoite</span>
+        </div>
+        <p class="chart-readout" id="readout-fi">Vie hiiri palkin päälle tai valitse se näppäimistöllä &ndash; saat lisätiedon tähän.</p>
+      </figure>
+
+      <p>Huomaa, että puolustusmenoista on liikkeellä eri lukuja. Naton laskentatapa on laajempi kuin Suomen oma budjettitekninen määritelmä, joten sama vuosi voi näyttää eri prosentin riippuen siitä, kuka laskee. Kun näet luvun, tarkista aina määritelmä.</p>
+
+      <h3>Kolme hanketta, jotka kannattaa tuntea</h3>
+
+      <div class="cards">
+        <article class="card">
+          <span class="kicker">Ilmavoimat</span>
+          <h4>F-35A Lightning II</h4>
+          <p>64 häivehävittäjää korvaamaan Hornetit. Päätös joulukuussa 2021 kilpailussa, jossa olivat mukana myös Gripen, Rafale, Eurofighter ja Super Hornet.</p>
+          <dl>
+            <dt>Aikataulu</dt><dd>Ensimmäiset koneet Lapin lennostoon 2026, alkuvalmius (IOC) 2027, täysi valmius (FOC) 2030.</dd>
+            <dt>Teollisuus</dt><dd>Patria valmistaa eturunkoja Suomessa.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Maavoimat</span>
+          <h4>K9 Moukari</h4>
+          <p>Eteläkorealainen tela-alustainen 155 mm panssarihaupitsi. Liikkuvuus on sen tärkein ominaisuus: ampuu ja vaihtaa asemaa ennen kuin vastatuli ehtii.</p>
+          <dl>
+            <dt>Merkitys</dt><dd>Suomella on Euroopan mittakaavassa poikkeuksellisen vahva tykistö.</dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <span class="kicker">Ilmapuolustus</span>
+          <h4>David&rsquo;s Sling</h4>
+          <p>Israelilaisen Rafaelin pitkän kantaman ilmapuolustusjärjestelmä, Suomessa &rdquo;Daavidin linko&rdquo;. Noin 316 miljoonaa euroa (ilman alv).</p>
+          <dl>
+            <dt>Suorituskyky</dt><dd>Ulottuu noin 300 km päähän ja jopa 30 km korkeudelle.</dd>
+            <dt>Miksi</dt><dd>Täyttää ylimmän kerroksen, jota Suomella ei aiemmin ollut.</dd>
+          </dl>
+        </article>
+      </div>
+
+      <h3>Suomalaiset yritykset</h3>
+      <p>Ala työllistää Suomessa tuhansia ihmisiä, ja sen yhteenlaskettu liikevaihto oli vuonna 2025 noin 4,2 miljardia euroa &ndash; josta yli puolet vientiä. Huomionarvoista on, että kärkiyritysten joukossa on nykyään useita ohjelmisto- ja it-taloja, ei pelkkiä metallipajoja.</p>
+
+      <div class="cards">
+        <article class="card">
+          <h4>Patria</h4>
+          <p>Alan suomalainen lippulaiva. Panssaroidut pyöräajoneuvot (AMV), Nemo-kranaatinheitinjärjestelmä, lentokaluston ja ajoneuvojen elinkaaripalvelut.</p>
+          <dl>
+            <dt>Tilauskanta</dt><dd>3,5 mrd € (2025 lopussa, ennätys)</dd>
+            <dt>Omistus</dt><dd>Valtioenemmistöinen; omistaa 50 % Nammosta</dd>
+          </dl>
+        </article>
+        <article class="card">
+          <h4>Nammo</h4>
+          <p>Suomalais-norjalainen ampumatarvike- ja rakettimoottorivalmistaja. Juuri sitä kapasiteettia, josta Euroopassa on nyt pulaa.</p>
+          <dl><dt>Omistus</dt><dd>Norjan valtio 50 %, Patria 50 %</dd></dl>
+        </article>
+        <article class="card">
+          <h4>Insta</h4>
+          <p>Tamperelainen perheyritys ja Puolustusvoimien strateginen kumppani vuodesta 1973. Kyberturva, johtamis- ja viestintäratkaisut, lentokaluston elinkaaripalvelut, dronet.</p>
+        </article>
+        <article class="card">
+          <h4>Bittium</h4>
+          <p>Oululainen taktisten radioiden ja tietoturvallisen viestinnän valmistaja. Puolustusvoimien kanssa kumppanuussopimus vuosille 2025–2036.</p>
+        </article>
+        <article class="card">
+          <h4>Sako</h4>
+          <p>Riihimäkeläinen ase- ja patruunavalmistaja, osa italialaista Beretta-konsernia. Sekä sotilas- että siviilimarkkinat.</p>
+        </article>
+        <article class="card">
+          <h4>Millog</h4>
+          <p>Kunnossapitokumppani, joka huoltaa merkittävän osan Puolustusvoimien maakalustosta. Esimerkki siitä, että elinkaari on oma liiketoimintansa.</p>
+        </article>
+      </div>
+
+      <div class="note">
+        <span class="note-label">Miksi kotimainen teollisuus on puolustuspolitiikkaa</span>
+        <p>Suomen ratkaisu nojaa laajaan reserviin ja siihen, että kalusto on käyttökunnossa myös kriisissä. Jos huolto, varaosat ja ammukset ovat kokonaan ulkomaisen toimitusketjun varassa, kriisi katkaisee ne juuri silloin kun niitä tarvitaan. Tätä kutsutaan <strong>huoltovarmuudeksi</strong>, ja se on suomalaisten hankintapäätösten pysyvä kriteeri hinnan ja suorituskyvyn rinnalla.</p>
+      </div>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-4">Merkitse luetuksi</button>
+        <p class="foot-hint">Seuraavaksi: sanasto, jolla pärjää uutisissa.</p>
+      </div>
+    </section>
+
+    <!-- OSA 5 -->
+    <section class="sheet" id="osa-5" data-title="Sanasto" hidden>
+      <header class="sheet-head">
+        <span class="kicker">Osa 5 / 6 · Sanasto</span>
+        <h2>Sanasto</h2>
+        <p class="standfirst">Alan uutiset ovat täynnä lyhenteitä. Tässä ovat ne, jotka toistuvat &ndash; suomeksi ja ilman jargonia.</p>
+      </header>
+
+      <div class="filter-bar">
+        <input class="search" id="term-search" type="search" placeholder="Hae sanaa tai selitystä…" aria-label="Hae sanastosta" autocomplete="off">
+        <button class="chip" type="button" data-cat="kaikki" aria-pressed="true">Kaikki</button>
+        <button class="chip" type="button" data-cat="liiketoiminta" aria-pressed="false">Liiketoiminta</button>
+        <button class="chip" type="button" data-cat="teknologia" aria-pressed="false">Teknologia</button>
+        <button class="chip" type="button" data-cat="politiikka" aria-pressed="false">Politiikka</button>
+      </div>
+
+      <div class="terms" id="terms"></div>
+      <p class="empty" id="terms-empty" hidden>Ei osumia. Kokeile lyhyempää hakusanaa.</p>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-5">Merkitse luetuksi</button>
+        <p class="foot-hint">Seuraavaksi: testaa mitä jäi mieleen.</p>
+      </div>
+    </section>
+
+    <!-- OSA 6 -->
+    <section class="sheet" id="osa-6" data-title="Visa" hidden>
+      <header class="sheet-head">
+        <span class="kicker">Osa 6 / 6 · Kertaus</span>
+        <h2>Testaa itsesi</h2>
+        <p class="standfirst">Kaksitoista kysymystä edellisistä osista. Vastaa vapaasti väärin &ndash; jokaisesta saat perustelun.</p>
+      </header>
+
+      <div class="quiz-meta">
+        <span>Vastattu <span class="quiz-score" id="quiz-answered">0</span> / 12</span>
+        <span>Oikein <span class="quiz-score" id="quiz-correct">0</span></span>
+        <button class="button is-ghost" type="button" id="quiz-reset">Aloita alusta</button>
+      </div>
+
+      <div id="quiz"></div>
+      <div id="quiz-result" hidden></div>
+
+      <div class="sheet-foot">
+        <button class="button" type="button" data-complete="osa-6">Merkitse luetuksi</button>
+        <p class="foot-hint">Kurssi on tässä. Lähteet löytyvät sivun alalaidasta.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="colophon">
+  <div class="colophon-inner">
+    <h3>Lähteet</h3>
+    <ul class="sources">
+      <li>Maailman sotilasmenot ja yritysluvut: <a href="https://www.sipri.org/publications/2026/sipri-fact-sheets/trends-world-military-expenditure-2025">SIPRI, Trends in World Military Expenditure 2025</a> ja <a href="https://www.sipri.org/publications/2025/sipri-fact-sheets/sipri-top-100-arms-producing-and-military-services-companies-2024">SIPRI Top 100, 2024</a></li>
+      <li>Naton menotavoite: <a href="https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2025/06/25/the-hague-summit-declaration">Haagin huippukokousjulistus, 25.6.2025</a></li>
+      <li>EU:n rahoitusvälineet: <a href="https://www.consilium.europa.eu/en/policies/european-defence-readiness/">Eurooppa-neuvosto, European defence readiness</a></li>
+      <li>Suomen budjetti ja hankkeet: <a href="https://defmin.fi/ministerio/toiminta-ja-talous/puolustusbudjetti">Puolustusministeriö</a> ja <a href="https://puolustusvoimat.fi/en/hx-fighter-program">Puolustusvoimat, HX-hanke</a></li>
+      <li>Suomen alan liikevaihto: Puolustus- ja Ilmailuteollisuus PIA ry</li>
+    </ul>
+    <p class="disclaimer">Tämä on yleistajuinen oppimateriaali, ei sijoitus-, hankinta- tai turvallisuusneuvontaa. Luvut on koottu syyskuussa 2026 julkisista lähteistä, ja osa niistä on arvioita, jotka vaihtelevat lähteittäin. Tarkista aina alkuperäinen lähde ennen kuin käytät lukua päätöksentekoon.</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    "use strict";
+
+    /* ---------- osat ja edistyminen ---------- */
+
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main > section"));
+    var railList = document.getElementById("rail-list");
+    var progressFill = document.getElementById("progress-fill");
+    var progressText = document.getElementById("progress-text");
+    var STORE_KEY = "puolustusala.progress.v1";
+    var done = readDone();
+
+    function readDone() {
+      try {
+        var raw = window.localStorage.getItem(STORE_KEY);
+        var parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.filter(function (id) { return typeof id === "string"; }) : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function writeDone() {
+      try {
+        window.localStorage.setItem(STORE_KEY, JSON.stringify(done));
+      } catch (err) {
+        /* yksityinen selausikkuna tai estetty tallennus – eteneminen toimii silti istunnon ajan */
+      }
+    }
+
+    sections.forEach(function (section, index) {
+      var li = document.createElement("li");
+      var button = document.createElement("button");
+      button.className = "rail-link";
+      button.type = "button";
+      button.dataset.target = section.id;
+      button.innerHTML =
+        '<span class="rail-num">' + String(index + 1).padStart(2, "0") + "</span>" +
+        "<span>" + section.dataset.title + "</span>" +
+        '<span class="rail-tick" aria-hidden="true">✓</span>';
+      button.addEventListener("click", function () { show(section.id); });
+      li.appendChild(button);
+      railList.appendChild(li);
+    });
+
+    var railLinks = Array.prototype.slice.call(railList.querySelectorAll(".rail-link"));
+
+    function show(id) {
+      sections.forEach(function (section) { section.hidden = section.id !== id; });
+      railLinks.forEach(function (link) {
+        link.setAttribute("aria-current", link.dataset.target === id ? "true" : "false");
+      });
+      if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function refreshProgress() {
+      railLinks.forEach(function (link) {
+        link.dataset.done = done.indexOf(link.dataset.target) !== -1 ? "true" : "false";
+      });
+      var share = Math.round((done.length / sections.length) * 100);
+      progressFill.style.width = share + "%";
+      progressText.textContent = done.length + "/" + sections.length;
+    }
+
+    document.querySelectorAll("[data-complete]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var id = button.dataset.complete;
+        if (done.indexOf(id) === -1) done.push(id);
+        writeDone();
+        refreshProgress();
+        var index = sections.findIndex(function (section) { return section.id === id; });
+        if (index > -1 && index < sections.length - 1) {
+          show(sections[index + 1].id);
+        } else {
+          button.textContent = "Luettu ✓";
+        }
+      });
+    });
+
+    show(sections[0].id);
+    refreshProgress();
+
+    /* ---------- kaavioiden lisätiedot ---------- */
+
+    document.querySelectorAll(".bars").forEach(function (group) {
+      var readout = document.getElementById(group.dataset.readout);
+      var resting = readout.textContent;
+      group.querySelectorAll(".bar-row").forEach(function (row) {
+        function showNote() { readout.textContent = row.dataset.note; }
+        function clearNote() { readout.textContent = resting; }
+        row.addEventListener("mouseenter", showNote);
+        row.addEventListener("mouseleave", clearNote);
+        row.addEventListener("focus", showNote);
+        row.addEventListener("blur", clearNote);
+      });
+    });
+
+    /* ---------- sanasto ---------- */
+
+    var terms = [
+      { term: "Prime / pääurakoitsija", cat: "liiketoiminta", def: "Yritys, joka vastaa koko järjestelmästä asiakkaalle ja ostaa osat alihankkijoilta. Se, jonka nimi lukee sopimuksessa." },
+      { term: "Tier 1 / Tier 2", cat: "liiketoiminta", def: "Alihankintaportaat. Tier 1 toimittaa isoja kokonaisuuksia kuten moottorin tai tutkan, Tier 2 ja 3 yksittäisiä komponentteja." },
+      { term: "Tilauskanta (backlog)", cat: "liiketoiminta", def: "Jo sovittujen mutta vielä toimittamattomien kauppojen arvo. Kertoo tulevasta liikevaihdosta vuosiksi eteenpäin." },
+      { term: "Tilausvaltuus", cat: "liiketoiminta", def: "Suomen budjetissa myönnetty oikeus tehdä sitoumuksia, joiden maksut osuvat tuleville vuosille. Isot hankinnat tehdään näillä." },
+      { term: "Suorituskyky (capability)", cat: "liiketoiminta", def: "Kyky tehdä jotain sotilaallisesti hyödyllistä. Sisältää kaluston lisäksi henkilöstön, koulutuksen, huollon ja doktriinin." },
+      { term: "Elinkaarikustannus", cat: "liiketoiminta", def: "Koko käyttöiän kustannus: hankinta, käyttö, huolto, päivitykset ja lopulta hävittäminen. Yleensä paljon hankintahintaa suurempi." },
+      { term: "IOC ja FOC", cat: "liiketoiminta", def: "Initial ja Full Operational Capability: hetki, jolloin järjestelmä on ensimmäistä kertaa käyttökelpoinen, ja hetki jolloin se on täysin käytössä." },
+      { term: "Vastakauppa / teollinen osallistuminen", cat: "liiketoiminta", def: "Ehto, jonka mukaan myyjän on ohjattava osa työstä ostajamaan teollisuudelle. Suomessa esimerkiksi F-35:n eturunkojen valmistus." },
+      { term: "MRO", cat: "liiketoiminta", def: "Maintenance, Repair and Overhaul eli kunnossapito. Vakaa ja pitkäkestoinen liiketoiminta, usein kannattavampi kuin itse myynti." },
+      { term: "Huoltovarmuus", cat: "politiikka", def: "Kyky ylläpitää kalustoa ja tuotantoa myös kriisissä, kun kansainväliset toimitusketjut katkeavat. Suomalaisen hankintapolitiikan kulmakivi." },
+      { term: "ITAR", cat: "politiikka", def: "Yhdysvaltain vientisäännöstö, joka seuraa amerikkalaista teknologiaa. Voi estää laitteen jälleenviennin kolmanteen maahan." },
+      { term: "FMS", cat: "politiikka", def: "Foreign Military Sales. Malli, jossa ostetaan Yhdysvaltain hallitukselta, joka hankkii kaluston yritykseltä. Hitaampi mutta yhtenäisin ehdoin." },
+      { term: "Kaksikäyttötuote", cat: "politiikka", def: "Tuote, joka soveltuu sekä siviili- että sotilaskäyttöön, esimerkiksi lämpökamera tai drone. Vientilupasääntely koskee myös näitä." },
+      { term: "Yhteensopivuus (interoperability)", cat: "politiikka", def: "Kyky toimia liittolaisten kanssa: samat radiot, sama ammus, samat menettelyt. Nato-jäsenyyden käytännön ydin." },
+      { term: "SAFE", cat: "politiikka", def: "EU:n 150 miljardin euron lainaväline jäsenmaille. Ehtona yhteishankinta, jossa mukana vähintään kaksi maata." },
+      { term: "Readiness 2030", cat: "politiikka", def: "EU:n puolustuskyvyn vahvistamisen kokonaisuus, aiemmalta nimeltään ReArm Europe. Tavoitteena jopa 800 miljardin euron panostus." },
+      { term: "Naton 5 %:n tavoite", cat: "politiikka", def: "Haagin huippukokouksen 2025 päätös: 3,5 % BKT:stä ydinpuolustukseen ja enintään 1,5 % infraan ja varautumiseen vuoteen 2035 mennessä." },
+      { term: "Pidäke (deterrence)", cat: "politiikka", def: "Kyky saada vastustaja luopumaan hyökkäyksestä, koska hinta olisi liian kova. Puolustuksen perimmäinen tarkoitus." },
+      { term: "C4ISR", cat: "teknologia", def: "Johtaminen, viestintä, tietokoneet, tiedustelu ja valvonta. Kerros, joka yhdistää sensorit, päättäjät ja aseet samaan ketjuun." },
+      { term: "ISR", cat: "teknologia", def: "Tiedustelu, valvonta ja maalittaminen. Käytännössä se työ, jonka dronet, tutkat ja satelliitit tekevät." },
+      { term: "EW (elektroninen sodankäynti)", cat: "teknologia", def: "Radiotaajuuksien hyödyntäminen ja häirintä: yhteyksien katkaisu, paikannuksen harhauttaminen ja oman viestinnän suojaaminen." },
+      { term: "UAS / UAV / FPV", cat: "teknologia", def: "Miehittämätön ilma-alus eli drone. FPV tarkoittaa ohjaamista kameran kuvan kautta, kuin lentäjän silmin." },
+      { term: "C-UAS", cat: "teknologia", def: "Dronetorjunta: havaitseminen, häirintä ja tuhoaminen. Alan nopeimmin kasvava osa-alue." },
+      { term: "Kärkäävä lentoase", cat: "teknologia", def: "Drone, joka odottaa ilmassa kohdetta ja tuhoutuu iskiessään. Englanniksi loitering munition, arkikielessä kamikaze-drone." },
+      { term: "155 mm", cat: "teknologia", def: "Naton standardikaliiperi raskaassa tykistössä. Tuotantomäärä on ollut Euroopan keskeinen pullonkaula." },
+      { term: "Häive (stealth)", cat: "teknologia", def: "Muotoilulla ja materiaaleilla saavutettu pieni tutkaheijaste. Ei näkymättömyyttä vaan havaitsemisetäisyyden lyhentämistä." },
+      { term: "Sensorifuusio", cat: "teknologia", def: "Monen sensorin tiedon yhdistäminen yhdeksi tilannekuvaksi. Modernin hävittäjän tärkein ominaisuus." },
+      { term: "Kerroksellinen ilmapuolustus", cat: "teknologia", def: "Eri kantaman järjestelmien yhdistelmä, jolla jokaista uhkaa torjutaan sopivan hintaisella keinolla." },
+      { term: "Kustannusvaihto", cat: "teknologia", def: "Torjunnan ja kohteen hintasuhde. Jos torjunta maksaa moninkertaisesti kohteeseen nähden, puolustaja häviää pitkässä juoksussa." },
+      { term: "TRL", cat: "teknologia", def: "Technology Readiness Level, asteikko 1–9 sille kuinka valmis teknologia on. TRL 9 tarkoittaa todistetusti toimivaa käytössä olevaa järjestelmää." }
+    ];
+
+    var termsHost = document.getElementById("terms");
+    var termsEmpty = document.getElementById("terms-empty");
+    var search = document.getElementById("term-search");
+    var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+    var activeCat = "kaikki";
+
+    function renderTerms() {
+      var query = search.value.trim().toLowerCase();
+      var matches = terms.filter(function (item) {
+        var catOk = activeCat === "kaikki" || item.cat === activeCat;
+        var textOk = query === "" ||
+          item.term.toLowerCase().indexOf(query) !== -1 ||
+          item.def.toLowerCase().indexOf(query) !== -1;
+        return catOk && textOk;
+      });
+
+      termsHost.innerHTML = matches.map(function (item) {
+        return '<div class="term"><div><span class="term-name">' + item.term +
+          '</span><span class="term-cat">' + item.cat + '</span></div>' +
+          '<p class="term-def">' + item.def + "</p></div>";
+      }).join("");
+
+      termsEmpty.hidden = matches.length > 0;
+    }
+
+    search.addEventListener("input", renderTerms);
+
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        activeCat = chip.dataset.cat;
+        chips.forEach(function (other) {
+          other.setAttribute("aria-pressed", other === chip ? "true" : "false");
+        });
+        renderTerms();
+      });
+    });
+
+    renderTerms();
+
+    /* ---------- visa ---------- */
+
+    var questions = [
+      {
+        q: "Kuka on puolustusteollisuuden asiakas?",
+        options: ["Pääosin valtiot ja niiden puolustusvoimat", "Pääosin yksityiset turvallisuusyhtiöt", "Pääosin kuluttajat"],
+        correct: 0,
+        why: "Lähes kaikki myynti menee valtioille. Siksi kysyntää ohjaa politiikka ja budjettipäätökset, ei kuluttajakysyntä."
+      },
+      {
+        q: "Mitä yrityksen tilauskanta kertoo?",
+        options: ["Kuinka paljon yritys myi viime vuonna", "Jo sovittujen, vielä toimittamattomien kauppojen arvon", "Kuinka paljon yrityksellä on käteistä"],
+        correct: 1,
+        why: "Tilauskanta on näkymä tuleviin vuosiin. Rheinmetallilla se oli 2025 lopussa 64 mrd € eli noin kuusi vuotta myyntiä, Patrialla 3,5 mrd €."
+      },
+      {
+        q: "Mikä osa isoa hankintaa maksaa yleensä eniten?",
+        options: ["Itse laitteen ostohinta", "Käyttö ja ylläpito koko elinkaaren ajan", "Henkilöstön rekrytointi"],
+        correct: 1,
+        why: "Elinkaarikustannus – huolto, varaosat, koulutus ja päivitykset 30–40 vuoden ajan – ylittää tyypillisesti selvästi hankintahinnan."
+      },
+      {
+        q: "Paljonko maailman sotilasmenot olivat vuonna 2025?",
+        options: ["Noin 900 miljardia dollaria", "Noin 1 500 miljardia dollaria", "Noin 2 900 miljardia dollaria"],
+        correct: 2,
+        why: "SIPRIn mukaan 2 887 miljardia dollaria, kasvua 2,9 % reaalisesti ja yhdestoista kasvuvuosi peräkkäin."
+      },
+      {
+        q: "Kuinka suuri osuus maailman sotilasmenoista on Yhdysvalloilla?",
+        options: ["Noin kolmannes", "Noin 10 prosenttia", "Noin kaksi kolmasosaa"],
+        correct: 0,
+        why: "Yhdysvaltain 954 miljardia dollaria oli 33 % maailman menoista. Kolme suurinta – USA, Kiina ja Venäjä – kattoivat yhdessä 51 %."
+      },
+      {
+        q: "Mitä Naton Haagin huippukokouksessa 2025 sovittiin?",
+        options: ["2 % BKT:stä vuoteen 2030 mennessä", "5 % BKT:stä vuoteen 2035 mennessä, jakautuen 3,5 % + 1,5 %", "Yhteinen EU-armeija"],
+        correct: 1,
+        why: "Vähintään 3,5 % ydinpuolustukseen ja enintään 1,5 % kriittiseen infraan, kyberpuolustukseen ja varautumiseen. Edistymistä tarkastellaan 2029."
+      },
+      {
+        q: "Mikä on SAFE?",
+        options: ["Naton uusi komentorakenne", "EU:n 150 mrd euron lainaväline yhteishankintoihin", "Yhdysvaltain vientilupamenettely"],
+        correct: 1,
+        why: "SAFE on Readiness 2030 -kokonaisuuden ensimmäinen toteutunut osa. Lainan ehtona on yhteishankinta, jossa on mukana vähintään kaksi maata."
+      },
+      {
+        q: "Miksi 155 millimetristä puhutaan jatkuvasti?",
+        options: ["Se on Naton standardikaliiperi raskaassa tykistössä", "Se on uusi ohjustyyppi", "Se on droneen mahtuvan kameran koko"],
+        correct: 0,
+        why: "Euroopan tuotanto on noussut noin 350 000 ammuksesta vuodessa yli miljoonaan, ja kapasiteettikaton arvioidaan yltävän 2,4 miljoonaan vuonna 2026."
+      },
+      {
+        q: "Mitä kustannusvaihdon ongelma tarkoittaa dronetorjunnassa?",
+        options: ["Dronet ovat kalliimpia kuin niiden torjunta", "Kallis torjuntaohjus halpaa dronea vastaan ei kestä pitkään", "Torjunta on ilmaista"],
+        correct: 1,
+        why: "Jos torjunta maksaa moninkertaisesti kohteeseen nähden, puolustaja häviää taloudellisesti vaikka osuisi joka kerta. Siksi halpoja torjuntakeinoja kehitetään kiivaasti."
+      },
+      {
+        q: "Montako F-35-hävittäjää Suomi hankkii ja milloin täysi suorituskyky saavutetaan?",
+        options: ["64 konetta, täysi valmius 2030", "32 konetta, täysi valmius 2027", "100 konetta, täysi valmius 2040"],
+        correct: 0,
+        why: "Ensimmäiset koneet saapuvat Lapin lennostoon 2026, alkuvalmius (IOC) on tavoitteena 2027 ja täysi valmius (FOC) 2030 loppuun mennessä."
+      },
+      {
+        q: "Kuinka suuri osa Suomen puolustusalan liikevaihdosta tuli viennistä 2025?",
+        options: ["Noin 5 %", "Noin 25 %", "Noin 55 %"],
+        correct: 2,
+        why: "Alan liikevaihto Suomessa oli noin 4,2 miljardia euroa, josta noin 55 % vientiä. Ala on muuttunut kotimarkkinatoimittajasta vientialaksi."
+      },
+      {
+        q: "Mitä ITAR tarkoittaa ostajamaan kannalta?",
+        options: ["Yhdysvaltain teknologia tuo mukanaan vientirajoituksia", "Nato takaa varaosien saatavuuden", "EU rahoittaa hankinnan"],
+        correct: 0,
+        why: "ITAR seuraa amerikkalaista teknologiaa mukana. Jos laitteessa on ITAR-osia, Yhdysvallat voi rajoittaa sen jälleenvientiä – vaikka laite olisi valmistettu Euroopassa."
+      }
+    ];
+
+    var quizHost = document.getElementById("quiz");
+    var quizResult = document.getElementById("quiz-result");
+    var answeredEl = document.getElementById("quiz-answered");
+    var correctEl = document.getElementById("quiz-correct");
+    var answered = 0;
+    var correct = 0;
+
+    function buildQuiz() {
+      answered = 0;
+      correct = 0;
+      answeredEl.textContent = "0";
+      correctEl.textContent = "0";
+      quizResult.hidden = true;
+      quizResult.innerHTML = "";
+      quizHost.innerHTML = "";
+
+      questions.forEach(function (item, qi) {
+        var block = document.createElement("div");
+        block.className = "question";
+
+        var heading = document.createElement("p");
+        heading.className = "q-text";
+        heading.innerHTML = '<span class="q-num">' + String(qi + 1).padStart(2, "0") + "</span>" + item.q;
+        block.appendChild(heading);
+
+        var options = document.createElement("div");
+        options.className = "options";
+
+        item.options.forEach(function (label, oi) {
+          var option = document.createElement("button");
+          option.className = "option";
+          option.type = "button";
+          option.id = "q" + qi + "-o" + oi;
+          option.innerHTML = '<span class="option-mark">' + "ABC".charAt(oi) + "</span><span>" + label + "</span>";
+          option.addEventListener("click", function () { answer(block, item, qi, oi); });
+          options.appendChild(option);
+        });
+
+        block.appendChild(options);
+        quizHost.appendChild(block);
+      });
+    }
+
+    function answer(block, item, qi, chosen) {
+      if (block.dataset.answered === "true") return;
+      block.dataset.answered = "true";
+
+      var options = Array.prototype.slice.call(block.querySelectorAll(".option"));
+      options.forEach(function (option, oi) {
+        option.disabled = true;
+        if (oi === item.correct) option.dataset.state = "correct";
+        if (oi === chosen && chosen !== item.correct) option.dataset.state = "wrong";
+      });
+
+      var explain = document.createElement("p");
+      explain.className = "explain";
+      explain.innerHTML = "<strong>" + (chosen === item.correct ? "Oikein. " : "Oikea vastaus: " + item.options[item.correct] + ". ") + "</strong>" + item.why;
+      block.appendChild(explain);
+
+      answered += 1;
+      if (chosen === item.correct) correct += 1;
+      answeredEl.textContent = String(answered);
+      correctEl.textContent = String(correct);
+
+      if (answered === questions.length) finish();
+    }
+
+    function finish() {
+      var verdict;
+      if (correct >= 11) verdict = "Erinomaista. Pystyt lukemaan alan uutisia ilman sanakirjaa.";
+      else if (correct >= 8) verdict = "Hyvä tulos. Perusrakenne on hallussa – kertaa vielä luvut osasta 2.";
+      else if (correct >= 5) verdict = "Pohja on olemassa. Lue osat 1 ja 2 uudestaan, ne kantavat loput.";
+      else verdict = "Aloita rauhassa osasta 1. Kolme ensimmäistä käsitettä riittävät alkuun.";
+
+      quizResult.hidden = false;
+      quizResult.className = "quiz-result";
+      quizResult.innerHTML = "<h3>" + correct + " / " + questions.length + " oikein</h3><p>" + verdict + "</p>";
+      quizResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    document.getElementById("quiz-reset").addEventListener("click", buildQuiz);
+    buildQuiz();
+  })();
+</script>
