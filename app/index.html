@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tehtävälista</title>
+  </head>
+  <body>
+    <main class="app">
+      <h1>Tehtävälista</h1>
+
+      <form id="task-form" class="task-form" autocomplete="off">
+        <input
+          id="task-input"
+          class="task-input"
+          type="text"
+          name="title"
+          placeholder="Mitä pitäisi tehdä?"
+          aria-label="Uuden tehtävän kuvaus"
+          maxlength="120"
+          required
+        />
+        <button class="button" type="submit">Lisää</button>
+      </form>
+
+      <div class="filters" role="group" aria-label="Suodata tehtäviä">
+        <button class="filter is-active" type="button" data-filter="all">Kaikki</button>
+        <button class="filter" type="button" data-filter="active">Kesken</button>
+        <button class="filter" type="button" data-filter="done">Valmiit</button>
+      </div>
+
+      <ul id="task-list" class="task-list"></ul>
+
+      <p id="task-status" class="status" aria-live="polite"></p>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
