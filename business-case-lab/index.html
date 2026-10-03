@@ -1,0 +1,1160 @@
+<title>Business Case Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* Layout: workbench — sticky lever rail on the left, KPI strip + mission chips + tabbed analysis on the right; stacks on phones. */
+:root {
+  --bg: #eef0ec;
+  --surface: #fcfcfb;
+  --surface-2: #e6e9e4;
+  --ink: #121916;
+  --ink-2: #4b5550;
+  --muted: #7d8681;
+  --line: #d9ddd6;
+  --line-strong: #c3c8c1;
+  --accent: #0d6857;
+  --accent-soft: #d6ebe5;
+  --accent-ink: #ffffff;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+  --good: #0ca30c; --good-text: #006300; --warn: #fab219; --warn-text: #8a5a00; --crit: #d03b3b;
+  --div-pos: #1c5cab; --div-neg: #c23a3a; --div-mid: #f0efec;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1110; --surface: #171b19; --surface-2: #212624; --ink: #f1f4f2; --ink-2: #bcc4bf;
+    --muted: #868f8a; --line: #2a2f2d; --line-strong: #3a403d; --accent: #3db39b; --accent-soft: #173a33; --accent-ink: #06130f;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+    --good-text: #0ca30c; --warn-text: #fab219; --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1110; --surface: #171b19; --surface-2: #212624; --ink: #f1f4f2; --ink-2: #bcc4bf;
+  --muted: #868f8a; --line: #2a2f2d; --line-strong: #3a403d; --accent: #3db39b; --accent-soft: #173a33; --accent-ink: #06130f;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  --good-text: #0ca30c; --warn-text: #fab219; --div-pos: #3987e5; --div-neg: #e66767; --div-mid: #383835;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.45; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { max-width: 1480px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 40px; display: grid; gap: 16px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-bottom: 14px; border-bottom: 1px solid var(--line-strong); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark { width: 34px; height: 34px; border-radius: 4px; background: var(--accent); display: grid; place-items: center; color: var(--accent-ink); font-family: var(--font-display); font-weight: 800; font-size: 13px; font-stretch: 80%; letter-spacing: .02em; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+h1 { margin: 0; font-family: var(--font-display); font-weight: 750; font-stretch: 85%; font-size: 26px; line-height: 1.05; letter-spacing: -.01em; }
+.scen-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.scen-bar label { font-size: 12px; color: var(--ink-2); }
+select, .txt { background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); padding: 6px 10px; min-height: 34px; }
+#scenSel { min-width: 180px; font-weight: 600; }
+.btn { background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); padding: 6px 12px; min-height: 34px; cursor: pointer; font-weight: 500; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--crit); }
+.btn.danger.armed { background: var(--crit); border-color: var(--crit); color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.stars { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.stars b { font-size: 16px; letter-spacing: 1px; color: var(--s4); font-weight: 400; }
+
+/* Body layout */
+.layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* Levers */
+.levers { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 4px 16px 16px; }
+@media (max-width: 900px) { .levers { position: static; max-height: none; } }
+.lv-group { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; display: grid; gap: 12px; }
+.lv-group:first-child { border-top: 0; margin-top: 4px; }
+.lv-group h3 { margin: 0; font-family: var(--font-display); font-stretch: 90%; font-weight: 650; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.lever { display: grid; gap: 4px; }
+.lv-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lv-head label { font-size: 13px; }
+.lv-val { display: flex; align-items: center; gap: 4px; }
+.lv-val input { width: 74px; text-align: right; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lv-val input.changed { border-color: var(--accent); background: var(--accent-soft); }
+.lv-val span { font-size: 11px; color: var(--muted); min-width: 34px; }
+.lv-hint { font-size: 11px; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; height: 20px; }
+.lv-foot { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* KPI strip */
+main { min-width: 0; display: grid; gap: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; position: relative; overflow: hidden; }
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--line-strong); }
+.kpi.good::before { background: var(--good); }
+.kpi.warn::before { background: var(--warn); }
+.kpi.crit::before { background: var(--crit); }
+.kpi .k-label { font-size: 12px; color: var(--ink-2); }
+.kpi .k-val { font-family: var(--font-display); font-stretch: 85%; font-weight: 700; font-size: 26px; line-height: 1.1; transition: color .2s; }
+.kpi .k-sub { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+.pill.good { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good-text); }
+.pill.warn { background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn-text); }
+.pill.crit { background: color-mix(in srgb, var(--crit) 16%, transparent); color: var(--crit); }
+
+/* Missions */
+.missions { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 10px; }
+.m-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.m-head h2 { margin: 0; font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 15px; }
+.m-progress { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.m-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; }
+.mission { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; align-items: start; padding: 8px 10px; border-radius: 6px; border: 1px dashed var(--line-strong); transition: background .25s, border-color .25s; }
+.mission.done { border-style: solid; border-color: color-mix(in srgb, var(--good) 50%, transparent); background: color-mix(in srgb, var(--good) 8%, transparent); }
+.m-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: transparent; }
+.mission.done .m-icon { background: var(--good); border-color: var(--good); color: #fff; }
+.mission.done .m-icon.pop { animation: pop .4s ease; }
+@keyframes pop { 0% { transform: scale(.6); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.m-title { font-weight: 600; font-size: 13px; }
+.m-desc { font-size: 12px; color: var(--ink-2); }
+.m-now { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+details.score summary { cursor: pointer; font-size: 12px; color: var(--ink-2); }
+details.score ul { margin: 6px 0 0; padding-left: 18px; font-size: 12px; color: var(--ink-2); }
+
+.checks { display: grid; gap: 6px; }
+.check { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; border-radius: 6px; background: color-mix(in srgb, var(--warn) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); font-size: 13px; }
+.check b { color: var(--warn-text); }
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line-strong); overflow-x: auto; }
+.tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 14px; cursor: pointer; font-family: var(--font-display); font-stretch: 90%; font-weight: 600; font-size: 15px; color: var(--ink-2); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.panel { display: grid; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; display: grid; gap: 10px; }
+.card h3 { margin: 0; font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 15px; }
+.card .sub { font-size: 12px; color: var(--muted); margin-top: -6px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.chart-box { position: relative; height: 290px; }
+.chart-box.tall { height: 360px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.legend i.ln { height: 2px; width: 14px; vertical-align: 3px; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 13px; }
+th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 11px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; border-bottom-color: var(--line-strong); }
+tr.total td { font-weight: 600; border-top: 1px solid var(--line-strong); }
+tr.em td { font-weight: 600; }
+td.neg { color: var(--crit); }
+.cell-in { width: 82px; text-align: right; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); font-family: var(--font-mono); font-size: 12px; }
+.cell-name { width: 64px; text-align: left; font-weight: 600; }
+.delta { font-size: 11px; display: block; }
+.delta.up { color: var(--good-text); }
+.delta.down { color: var(--crit); }
+
+/* Mix shift */
+.shift { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 13px; }
+.shift input[type=range] { width: 140px; }
+.shift-out { font-family: var(--font-mono); font-size: 12px; padding: 4px 8px; border-radius: 4px; background: var(--surface-2); }
+
+/* Compare chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface); cursor: pointer; font-size: 13px; }
+.chip input { accent-color: var(--accent); margin: 0; }
+.chip .sw { width: 10px; height: 10px; border-radius: 50%; }
+.chip.off { opacity: .55; }
+
+/* Sensitivity */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; font-size: 13px; }
+.be-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.be { padding: 10px 12px; border-radius: 6px; background: var(--surface-2); display: grid; gap: 2px; }
+.be .be-k { font-size: 12px; color: var(--ink-2); }
+.be .be-v { font-family: var(--font-display); font-stretch: 85%; font-weight: 700; font-size: 22px; }
+.be .be-s { font-size: 11px; color: var(--muted); }
+.heat td, .heat th { text-align: center; padding: 0; border: 2px solid var(--surface); font-family: var(--font-mono); font-size: 11px; }
+.heat td { height: 34px; min-width: 62px; }
+.heat td.cur { outline: 2px solid var(--ink); outline-offset: -3px; font-weight: 600; }
+.heat th { color: var(--ink-2); font-weight: 500; padding: 4px 6px; }
+.axis-note { font-size: 12px; color: var(--muted); }
+
+textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-size: 11px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--ink); }
+.foot-note { font-size: 12px; color: var(--muted); max-width: 70ch; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">E–</div>
+      <div>
+        <div class="eyebrow">E-series · 7 sizes · 5-year case · €</div>
+        <h1>Business Case Lab</h1>
+      </div>
+    </div>
+    <div class="scen-bar">
+      <label for="scenSel">Scenario</label>
+      <select id="scenSel"></select>
+      <input id="renameIn" class="txt" type="text" maxlength="40" hidden aria-label="Scenario name">
+      <button class="btn" id="btnNew" type="button">New</button>
+      <button class="btn" id="btnDup" type="button">Duplicate</button>
+      <button class="btn" id="btnRename" type="button">Rename</button>
+      <button class="btn danger" id="btnDel" type="button">Delete</button>
+      <span class="stars" id="stars" title="Scenario score"></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="levers" id="levers" aria-label="Levers"></aside>
+
+    <main>
+      <section class="kpis" id="kpis" aria-label="Key figures"></section>
+      <section class="missions" aria-label="Missions">
+        <div class="m-head">
+          <h2>Missions</h2>
+          <span class="m-progress" id="mProgress"></span>
+        </div>
+        <div class="m-list" id="mList"></div>
+        <details class="score"><summary>How the scenario score is calculated</summary><ul id="scoreList"></ul></details>
+      </section>
+      <div class="checks" id="checks"></div>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="model" id="t-model" type="button">Model</button>
+        <button class="tab" role="tab" data-tab="mix" id="t-mix" type="button">Size mix</button>
+        <button class="tab" role="tab" data-tab="compare" id="t-compare" type="button">Compare scenarios</button>
+        <button class="tab" role="tab" data-tab="sens" id="t-sens" type="button">Sensitivity</button>
+      </nav>
+
+      <!-- MODEL -->
+      <section class="panel" id="p-model" role="tabpanel">
+        <div class="card">
+          <h3>Revenue, costs and EBIT</h3>
+          <div class="sub">Total costs = variable costs + fixed costs + depreciation</div>
+          <div class="legend"><span><i style="background:var(--s1)"></i>Revenue</span><span><i style="background:var(--s2)"></i>Total costs</span><span><i class="ln" style="background:var(--ink)"></i>EBIT</span></div>
+          <div class="chart-box"><canvas id="cPL" aria-label="Revenue, costs and EBIT by year" role="img"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Income statement and cash flow</h3>
+          <div class="tbl-wrap"><table id="plTable"></table></div>
+        </div>
+      </section>
+
+      <!-- MIX -->
+      <section class="panel" id="p-mix" role="tabpanel" hidden>
+        <div class="card">
+          <h3>Size range, year 1</h3>
+          <div class="sub">Edit the base data for this scenario. Net price and unit costs include the levers on the left.</div>
+          <div class="tbl-wrap"><table id="sizeTable"></table></div>
+        </div>
+        <div class="card">
+          <h3>Shift volume between sizes</h3>
+          <div class="shift">
+            <span>Move</span>
+            <input type="range" id="shiftPct" min="0" max="50" step="5" value="20" aria-label="Share of volume to move">
+            <b id="shiftPctOut">20%</b>
+            <span>of</span>
+            <select id="shiftFrom" aria-label="From size"></select>
+            <span>volume to</span>
+            <select id="shiftTo" aria-label="To size"></select>
+            <span class="shift-out" id="shiftOut"></span>
+            <button class="btn primary" id="shiftApply" type="button">Apply shift</button>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <h3>Unit margin by size</h3>
+            <div class="sub">€ per piece after channel discount, year 1</div>
+            <div class="chart-box"><canvas id="cUnit" role="img" aria-label="Unit margin by size"></canvas></div>
+          </div>
+          <div class="card">
+            <h3>Portfolio map</h3>
+            <div class="sub">Volume vs. margin %. Bubble area = total gross margin €</div>
+            <div class="chart-box"><canvas id="cBubble" role="img" aria-label="Volume versus margin per size"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPARE -->
+      <section class="panel" id="p-compare" role="tabpanel" hidden>
+        <div class="card">
+          <h3>Pick up to 4 scenarios</h3>
+          <div class="chips" id="cmpChips"></div>
+          <div class="sub" style="margin-top:0">The first selected scenario is the reference for the Δ values.</div>
+        </div>
+        <div class="card">
+          <h3>Key figures side by side</h3>
+          <div class="tbl-wrap"><table id="cmpTable"></table></div>
+        </div>
+        <div class="grid2">
+          <div class="card">
+            <h3>Cumulative cash flow</h3>
+            <div class="sub">Where a line crosses zero is the payback point</div>
+            <div class="legend" id="cmpLegend1"></div>
+            <div class="chart-box"><canvas id="cCum" role="img" aria-label="Cumulative cash flow by scenario"></canvas></div>
+          </div>
+          <div class="card">
+            <h3>EBIT by year</h3>
+            <div class="legend" id="cmpLegend2"></div>
+            <div class="chart-box"><canvas id="cEbit" role="img" aria-label="EBIT by year and scenario"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Export for the debrief</h3>
+          <div class="controls"><button class="btn" id="btnCsv" type="button">Copy CSV of selected scenarios</button><span id="csvMsg" class="axis-note"></span></div>
+          <textarea class="csv" id="csvOut" hidden readonly aria-label="CSV data"></textarea>
+        </div>
+      </section>
+
+      <!-- SENSITIVITY -->
+      <section class="panel" id="p-sens" role="tabpanel" hidden>
+        <div class="card">
+          <div class="controls">
+            <label>Swing each input by
+              <select id="sensSwing"><option value="5">±5%</option><option value="10" selected>±10%</option><option value="20">±20%</option></select>
+            </label>
+            <label>Measure
+              <select id="sensMetric"><option value="npv" selected>NPV</option><option value="ebit3">EBIT, year 3</option><option value="cumEbit">Cumulative EBIT</option></select>
+            </label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Tornado: which lever moves the result most</h3>
+          <div class="sub">Each bar shows the result when one input moves down or up and everything else stays put. The vertical line marks the current result.</div>
+          <div class="legend"><span><i style="background:var(--s1)"></i>Input lowered</span><span><i style="background:var(--s2)"></i>Input raised</span></div>
+          <div class="chart-box tall"><canvas id="cTornado" role="img" aria-label="Tornado chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Break-even headroom</h3>
+          <div class="sub">How far one input can move on its own before NPV turns negative</div>
+          <div class="be-list" id="beList"></div>
+        </div>
+        <div class="card">
+          <h3>NPV heatmap: price × volume</h3>
+          <div class="sub">Changes relative to the current scenario. Price changes include the elasticity effect on volume.</div>
+          <div class="tbl-wrap"><table class="heat" id="heat"></table></div>
+          <div class="axis-note">Rows: price level change · Columns: volume change · Outlined cell: current scenario</div>
+        </div>
+      </section>
+
+      <p class="foot-note">Example data is fictional. Scenarios are saved in this browser only. NPV uses after-tax free cash flow with working capital released in the final year and no terminal value.</p>
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- Defaults ---------- */
+const DEFAULT_SIZES = [
+  { name: 'E01', vol: 18000, price: 42,  mat: 13,  lab: 6,  log: 2 },
+  { name: 'E02', vol: 15000, price: 58,  mat: 18,  lab: 7,  log: 2.5 },
+  { name: 'E04', vol: 12000, price: 79,  mat: 26,  lab: 9,  log: 3.2 },
+  { name: 'E06', vol: 8500,  price: 108, mat: 37,  lab: 12, log: 4.5 },
+  { name: 'E08', vol: 5200,  price: 149, mat: 55,  lab: 16, log: 6.5 },
+  { name: 'E10', vol: 2600,  price: 205, mat: 84,  lab: 22, log: 9.5 },
+  { name: 'E12', vol: 900,   price: 289, mat: 158, lab: 34, log: 14 },
+];
+const BASE_D = {
+  volLevel: 0, volGrowth: 6, elasticity: -1.2,
+  priceLevel: 0, priceChange: 2, discount: 25,
+  matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
+  staff: 380, marketing: 180, rnd: 120, other: 90, fixedInfl: 2.5,
+  capex: 1200, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
+};
+const PRESETS = [
+  { name: 'Base', d: {} },
+  { name: 'Pessimistic', d: { volLevel: -15, volGrowth: 2, priceChange: 0, matInfl: 6, labInfl: 4 } },
+  { name: 'Optimistic', d: { volLevel: 10, volGrowth: 10, priceLevel: 3, matInfl: 1.5 } },
+];
+
+const LEVERS = [
+  { group: 'Market & volume', items: [
+    { k: 'volLevel', label: 'Volume vs. plan', min: -50, max: 50, step: 1, unit: '%' },
+    { k: 'volGrowth', label: 'Volume growth', min: -10, max: 30, step: 0.5, unit: '%/y' },
+    { k: 'elasticity', label: 'Price elasticity', min: -3, max: 0, step: 0.1, unit: '', hint: '−1.2: a 1% price rise cuts volume by about 1.2%' },
+  ]},
+  { group: 'Price', items: [
+    { k: 'priceLevel', label: 'Price level vs. list', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'priceChange', label: 'Annual price change', min: -5, max: 10, step: 0.5, unit: '%/y' },
+    { k: 'discount', label: 'Channel discount', min: 0, max: 50, step: 1, unit: '%' },
+  ]},
+  { group: 'Unit cost', items: [
+    { k: 'matLevel', label: 'Material cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'labLevel', label: 'Labour cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'logLevel', label: 'Logistics cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'matInfl', label: 'Material inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
+    { k: 'labInfl', label: 'Labour & logistics inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
+  ]},
+  { group: 'Fixed costs per year', items: [
+    { k: 'staff', label: 'Staff', min: 0, max: 1500, step: 10, unit: 'k€' },
+    { k: 'marketing', label: 'Marketing', min: 0, max: 1000, step: 10, unit: 'k€' },
+    { k: 'rnd', label: 'Product development', min: 0, max: 1000, step: 10, unit: 'k€' },
+    { k: 'other', label: 'Other fixed', min: 0, max: 600, step: 10, unit: 'k€' },
+    { k: 'fixedInfl', label: 'Fixed cost inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
+  ]},
+  { group: 'Investment & finance', items: [
+    { k: 'capex', label: 'Investment (CAPEX)', min: 0, max: 5000, step: 50, unit: 'k€' },
+    { k: 'depYears', label: 'Depreciation period', min: 1, max: 15, step: 1, unit: 'years' },
+    { k: 'nwc', label: 'Working capital', min: 0, max: 40, step: 1, unit: '% rev.' },
+    { k: 'tax', label: 'Corporate tax', min: 0, max: 40, step: 1, unit: '%' },
+    { k: 'wacc', label: 'Discount rate (WACC)', min: 2, max: 25, step: 0.5, unit: '%' },
+    { k: 'horizon', label: 'Time horizon', min: 3, max: 10, step: 1, unit: 'years' },
+  ]},
+];
+const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
+
+/* ---------- State ---------- */
+const STORE_KEY = 'bcl.v1';
+const clone = o => JSON.parse(JSON.stringify(o));
+let uid = 1;
+function makeScenario(name, dOverrides, sizes, colorIdx) {
+  return { id: 's' + Date.now().toString(36) + (uid++), name, color: colorIdx, d: Object.assign(clone(BASE_D), dOverrides || {}), sizes: clone(sizes || DEFAULT_SIZES) };
+}
+function defaultState() {
+  const scenarios = PRESETS.map((p, i) => makeScenario(p.name, p.d, null, i));
+  return { scenarios, activeId: scenarios[0].id, compareIds: scenarios.map(s => s.id), tab: 'model', nextColor: 3 };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const st = JSON.parse(raw);
+      if (st && Array.isArray(st.scenarios) && st.scenarios.length) {
+        st.scenarios.forEach(s => { s.d = Object.assign(clone(BASE_D), s.d); });
+        return st;
+      }
+    }
+  } catch (e) {}
+  return defaultState();
+}
+let state = loadState();
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }, 250);
+}
+const active = () => state.scenarios.find(s => s.id === state.activeId) || state.scenarios[0];
+const baseScenario = () => state.scenarios.find(s => s.name === 'Base') || state.scenarios[0];
+
+/* ---------- Model ---------- */
+function compute(s) {
+  const d = s.d, H = Math.round(d.horizon);
+  const elastic = Math.pow(Math.max(0.01, 1 + d.priceLevel / 100), d.elasticity);
+  const volF0 = Math.max(0, 1 + d.volLevel / 100) * elastic;
+  const fixed0 = (d.staff + d.marketing + d.rnd + d.other) * 1000;
+  const capex = d.capex * 1000;
+  const dep = d.depYears > 0 ? capex / d.depYears : 0;
+  const years = [];
+  let prevNwc = 0, cum = -capex;
+  const cashflows = [-capex];
+  for (let t = 1; t <= H; t++) {
+    const g = Math.pow(1 + d.volGrowth / 100, t - 1);
+    const pf = (1 + d.priceLevel / 100) * Math.pow(1 + d.priceChange / 100, t - 1) * (1 - d.discount / 100);
+    const mf = (1 + d.matLevel / 100) * Math.pow(1 + d.matInfl / 100, t - 1);
+    const lf = (1 + d.labLevel / 100) * Math.pow(1 + d.labInfl / 100, t - 1);
+    const of = (1 + d.logLevel / 100) * Math.pow(1 + d.labInfl / 100, t - 1);
+    let units = 0, rev = 0, vc = 0;
+    const sz = s.sizes.map(z => {
+      const u = Math.max(0, z.vol * volF0 * g);
+      const np = z.price * pf;
+      const uc = z.mat * mf + z.lab * lf + z.log * of;
+      units += u; rev += u * np; vc += u * uc;
+      return { name: z.name, u, np, uc, um: np - uc, rev: u * np, gm: u * (np - uc) };
+    });
+    const gm = rev - vc;
+    const fixed = fixed0 * Math.pow(1 + d.fixedInfl / 100, t - 1);
+    const ebitda = gm - fixed;
+    const depT = t <= d.depYears ? dep : 0;
+    const ebit = ebitda - depT;
+    const tax = Math.max(0, ebit) * d.tax / 100;
+    const nopat = ebit - tax;
+    const nwc = rev * d.nwc / 100;
+    const dNwc = nwc - prevNwc; prevNwc = nwc;
+    const release = t === H ? nwc : 0;
+    const fcf = nopat + depT - dNwc + release;
+    cum += fcf;
+    cashflows.push(fcf);
+    years.push({ t, units, rev, vc, gm, fixed, ebitda, dep: depT, ebit, tax, nopat, dNwc, release, fcf, cum, sz });
+  }
+  const r = d.wacc / 100;
+  const npv = npvAt(cashflows, r);
+  const irr = irrOf(cashflows);
+  let payback = null, c = cashflows[0];
+  if (c >= 0) payback = 0;
+  else for (let t = 1; t < cashflows.length; t++) {
+    const n = c + cashflows[t];
+    if (n >= 0) { payback = t - 1 + (-c) / cashflows[t]; break; }
+    c = n;
+  }
+  const y1 = years[0];
+  const avgContr = y1.units > 0 ? y1.gm / y1.units : 0;
+  const beUnits = avgContr > 0 ? (y1.fixed + y1.dep) / avgContr : null;
+  const y3 = years[Math.min(3, H) - 1];
+  return {
+    years, cashflows, npv, irr, payback, beUnits,
+    beRevenue: beUnits != null && y1.units > 0 ? beUnits * y1.rev / y1.units : null,
+    ebitPct3: y3.rev > 0 ? y3.ebit / y3.rev : 0,
+    gmPct1: y1.rev > 0 ? y1.gm / y1.rev : 0,
+    cumEbit: years.reduce((a, y) => a + y.ebit, 0),
+    ebit3: y3.ebit, capex,
+  };
+}
+function npvAt(cf, r) { return cf.reduce((a, v, t) => a + v / Math.pow(1 + r, t), 0); }
+function irrOf(cf) {
+  let lo = -0.95, hi = 5, flo = npvAt(cf, lo), fhi = npvAt(cf, hi);
+  if (flo * fhi > 0) return null;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2, fm = npvAt(cf, mid);
+    if (flo * fm <= 0) { hi = mid; fhi = fm; } else { lo = mid; flo = fm; }
+  }
+  return (lo + hi) / 2;
+}
+const metricOf = (res, m) => m === 'npv' ? res.npv : m === 'ebit3' ? res.ebit3 : res.cumEbit;
+
+/* Perturbations used by sensitivity, break-even and missions */
+const lvl = (v, p) => ((1 + v / 100) * (1 + p) - 1) * 100;
+function topSizeIdx(s) {
+  let best = 0, bv = -Infinity;
+  s.sizes.forEach((z, i) => { const v = z.vol * z.price; if (v > bv) { bv = v; best = i; } });
+  return best;
+}
+function perturbations(s) {
+  const ti = topSizeIdx(s);
+  return [
+    { label: 'Volume', fn: (c, p) => { c.d.volLevel = lvl(c.d.volLevel, p); } },
+    { label: 'Price level', fn: (c, p) => { c.d.priceLevel = lvl(c.d.priceLevel, p); } },
+    { label: 'Material cost', fn: (c, p) => { c.d.matLevel = lvl(c.d.matLevel, p); } },
+    { label: 'Labour cost', fn: (c, p) => { c.d.labLevel = lvl(c.d.labLevel, p); } },
+    { label: 'Logistics cost', fn: (c, p) => { c.d.logLevel = lvl(c.d.logLevel, p); } },
+    { label: 'Fixed costs', fn: (c, p) => { ['staff', 'marketing', 'rnd', 'other'].forEach(k => c.d[k] *= 1 + p); } },
+    { label: 'CAPEX', fn: (c, p) => { c.d.capex *= 1 + p; } },
+    { label: 'WACC', fn: (c, p) => { c.d.wacc *= 1 + p; } },
+    { label: 'Volume growth', fn: (c, p) => { c.d.volGrowth *= 1 + p; } },
+    { label: 'Channel discount', fn: (c, p) => { c.d.discount = Math.min(99, c.d.discount * (1 + p)); } },
+    { label: s.sizes[ti].name + ' list price', fn: (c, p) => { c.sizes[ti].price *= 1 + p; } },
+  ];
+}
+function withChange(s, fn, p) { const c = clone(s); fn(c, p); return compute(c); }
+
+/* ---------- Format ---------- */
+const MINUS = '−';
+function eur(v, short = true) {
+  if (v == null || !isFinite(v)) return '–';
+  const a = Math.abs(v), sg = v < 0 ? MINUS : '';
+  if (!short) return sg + '€' + Math.round(a).toLocaleString('en-US');
+  if (a >= 1e6) return sg + '€' + (a / 1e6).toFixed(a >= 1e7 ? 1 : 2) + 'M';
+  if (a >= 1e3) return sg + '€' + (a / 1e3).toFixed(0) + 'k';
+  return sg + '€' + a.toFixed(0);
+}
+const eur2 = v => (v < 0 ? MINUS : '') + '€' + Math.abs(v).toFixed(2);
+const pct = (v, dp = 1) => v == null || !isFinite(v) ? '–' : (v < 0 ? MINUS : '') + Math.abs(v * 100).toFixed(dp) + '%';
+const num = v => Math.round(v).toLocaleString('en-US');
+const yrs = v => v == null ? 'never' : v.toFixed(1) + ' y';
+const signed = (v, dp = 1) => (v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v).toFixed(dp);
+const $ = id => document.getElementById(id);
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') e.className = v; else if (k === 'text') e.textContent = v; else if (k === 'style') e.style.cssText = v; else e.setAttribute(k, v);
+  }
+  kids.forEach(k => k != null && e.append(k));
+  return e;
+}
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const seriesColor = i => css('--s' + ((i % 8) + 1));
+
+/* ---------- Levers ---------- */
+function fmtLever(l, v) { return l.step < 1 ? Number(v).toFixed(l.step < 0.5 ? 1 : 1) : String(Math.round(v)); }
+function buildLevers() {
+  const root = $('levers'); root.textContent = '';
+  LEVERS.forEach(g => {
+    const grp = el('div', { class: 'lv-group' }, el('h3', { text: g.group }));
+    g.items.forEach(l => {
+      const range = el('input', { type: 'range', id: 'r-' + l.k, min: l.min, max: l.max, step: l.step, 'aria-label': l.label });
+      const numIn = el('input', { type: 'number', id: 'n-' + l.k, min: l.min, max: l.max, step: l.step, 'aria-label': l.label + ' value' });
+      const row = el('div', { class: 'lever' },
+        el('div', { class: 'lv-head' }, el('label', { for: 'n-' + l.k, text: l.label }), el('div', { class: 'lv-val' }, numIn, el('span', { text: l.unit }))),
+        range,
+        l.hint ? el('div', { class: 'lv-hint', text: l.hint }) : null);
+      range.addEventListener('input', () => setLever(l.k, parseFloat(range.value)));
+      numIn.addEventListener('change', () => {
+        let v = parseFloat(numIn.value); if (!isFinite(v)) v = active().d[l.k];
+        setLever(l.k, Math.min(l.max, Math.max(l.min, v)));
+      });
+      grp.append(row);
+    });
+    root.append(grp);
+  });
+  const reset = el('button', { class: 'btn', type: 'button', text: 'Reset levers to Base' });
+  reset.addEventListener('click', () => { const b = baseScenario(); active().d = clone(b === active() ? BASE_D : b.d); syncLevers(); renderAll(); save(); });
+  const resetAll = el('button', { class: 'btn danger', type: 'button', text: 'Reset workshop' });
+  let armT;
+  resetAll.addEventListener('click', () => {
+    if (!resetAll.classList.contains('armed')) {
+      resetAll.classList.add('armed'); resetAll.textContent = 'Click again to delete all scenarios';
+      armT = setTimeout(() => { resetAll.classList.remove('armed'); resetAll.textContent = 'Reset workshop'; }, 3500);
+      return;
+    }
+    clearTimeout(armT); state = defaultState(); save(); buildAll();
+  });
+  root.append(el('div', { class: 'lv-foot' }, reset, resetAll));
+}
+function setLever(k, v) {
+  active().d[k] = v;
+  const l = LEVER_BY_KEY[k];
+  $('r-' + k).value = v; $('n-' + k).value = fmtLever(l, v);
+  markChanged(k);
+  scheduleRender(); save();
+}
+function markChanged(k) {
+  const b = baseScenario();
+  $('n-' + k).classList.toggle('changed', Math.abs(active().d[k] - b.d[k]) > 1e-9 && b !== active());
+}
+function syncLevers() {
+  const d = active().d;
+  Object.values(LEVER_BY_KEY).forEach(l => { $('r-' + l.k).value = d[l.k]; $('n-' + l.k).value = fmtLever(l, d[l.k]); markChanged(l.k); });
+}
+
+/* ---------- Scenario bar ---------- */
+function buildScenarioBar() {
+  const sel = $('scenSel'); sel.textContent = '';
+  state.scenarios.forEach(s => sel.append(el('option', { value: s.id, text: s.name })));
+  sel.value = state.activeId;
+  $('btnDel').disabled = state.scenarios.length < 2;
+}
+$('scenSel').addEventListener('change', e => { state.activeId = e.target.value; syncLevers(); renderAll(); save(); });
+function addScenario(s) {
+  state.scenarios.push(s); state.activeId = s.id;
+  if (state.compareIds.length < 4) state.compareIds.push(s.id);
+  buildScenarioBar(); syncLevers(); renderAll(); save();
+}
+$('btnNew').addEventListener('click', () => {
+  const n = state.scenarios.length + 1;
+  addScenario(makeScenario('Scenario ' + n, {}, null, state.nextColor++ % 8));
+});
+$('btnDup').addEventListener('click', () => {
+  const a = active();
+  addScenario(makeScenario(('Copy of ' + a.name).slice(0, 40), clone(a.d), a.sizes, state.nextColor++ % 8));
+});
+$('btnRename').addEventListener('click', () => {
+  const inp = $('renameIn'), sel = $('scenSel');
+  inp.value = active().name; sel.hidden = true; inp.hidden = false; inp.focus(); inp.select();
+});
+function finishRename(commit) {
+  const inp = $('renameIn');
+  if (inp.hidden) return;
+  if (commit && inp.value.trim()) active().name = inp.value.trim().slice(0, 40);
+  inp.hidden = true; $('scenSel').hidden = false;
+  buildScenarioBar(); renderAll(); save();
+}
+$('renameIn').addEventListener('keydown', e => { if (e.key === 'Enter') finishRename(true); if (e.key === 'Escape') finishRename(false); });
+$('renameIn').addEventListener('blur', () => finishRename(true));
+let delT;
+$('btnDel').addEventListener('click', () => {
+  const b = $('btnDel');
+  if (state.scenarios.length < 2) return;
+  if (!b.classList.contains('armed')) {
+    b.classList.add('armed'); b.textContent = 'Confirm delete';
+    delT = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Delete'; }, 3000);
+    return;
+  }
+  clearTimeout(delT); b.classList.remove('armed'); b.textContent = 'Delete';
+  const id = state.activeId;
+  state.scenarios = state.scenarios.filter(s => s.id !== id);
+  state.compareIds = state.compareIds.filter(x => x !== id);
+  state.activeId = state.scenarios[0].id;
+  buildScenarioBar(); syncLevers(); renderAll(); save();
+});
+
+/* ---------- Score, missions, checks ---------- */
+function scoreOf(s, res) {
+  const swing = perturbations(s).slice(0, 7).flatMap(p => [withChange(s, p.fn, -0.1).npv, withChange(s, p.fn, 0.1).npv]);
+  const crit = [
+    { ok: res.npv > 0, txt: 'NPV is positive' },
+    { ok: res.irr != null && res.irr >= s.d.wacc / 100 + 0.10, txt: 'IRR beats WACC by 10 points or more' },
+    { ok: res.payback != null && res.payback <= 3, txt: 'Payback within 3 years' },
+    { ok: res.ebitPct3 >= 0.15, txt: 'EBIT margin of 15% or more in year 3' },
+    { ok: Math.min(...swing) > 0, txt: 'NPV stays positive when any single driver moves ±10%' },
+  ];
+  return { stars: crit.filter(c => c.ok).length, crit };
+}
+const MISSIONS = [
+  { id: 'm1', title: 'Margin builder', desc: 'Reach an EBIT margin of 15% or more in year 3.',
+    test: (s, r) => ({ ok: r.ebitPct3 >= 0.15, now: 'Now ' + pct(r.ebitPct3) }) },
+  { id: 'm2', title: 'Fast payback', desc: 'Pay back the investment within 3 years without raising price level more than +5%.',
+    test: (s, r) => ({ ok: r.payback != null && r.payback <= 3 && s.d.priceLevel <= 5, now: 'Now ' + yrs(r.payback) + ', price ' + signed(s.d.priceLevel, 0) + '%' }) },
+  { id: 'm3', title: 'Every size pays its way', desc: 'Keep a positive unit margin on all sizes in year 1, or drop the loss-maker (set its volume to 0).',
+    test: (s, r) => { const bad = r.years[0].sz.filter(z => z.u > 0 && z.um <= 0); return { ok: bad.length === 0, now: bad.length ? 'Loss-making: ' + bad.map(z => z.name).join(', ') : 'All sizes positive' }; } },
+  { id: 'm4', title: 'Shock-proof', desc: 'NPV stays positive even if material cost jumps +20%.',
+    test: (s, r) => { const n = withChange(s, (c) => { c.d.matLevel = lvl(c.d.matLevel, 0.2); }, 0).npv; return { ok: n > 0, now: 'Shocked NPV ' + eur(n) }; } },
+  { id: 'm5', title: 'Value creator', desc: 'Reach an IRR of 25% or more.',
+    test: (s, r) => ({ ok: r.irr != null && r.irr >= 0.25, now: 'Now ' + (r.irr == null ? 'n/a' : pct(r.irr)) }) },
+];
+let prevDone = {};
+function renderMissions(s, res) {
+  const list = $('mList'); list.textContent = '';
+  let n = 0;
+  const key = s.id;
+  const was = prevDone[key] || {};
+  const nowDone = {};
+  MISSIONS.forEach(m => {
+    const r = m.test(s, res); if (r.ok) n++;
+    nowDone[m.id] = r.ok;
+    const icon = el('span', { class: 'm-icon' + (r.ok && was[m.id] === false ? ' pop' : ''), 'aria-hidden': 'true', text: '✓' });
+    list.append(el('div', { class: 'mission' + (r.ok ? ' done' : '') },
+      icon,
+      el('div', null, el('div', { class: 'm-title', text: m.title + (r.ok ? ' · done' : '') }), el('div', { class: 'm-desc', text: m.desc }), el('div', { class: 'm-now', text: r.now }))));
+  });
+  prevDone[key] = nowDone;
+  $('mProgress').textContent = n + ' / ' + MISSIONS.length + ' complete';
+}
+function renderScore(s, res) {
+  const sc = scoreOf(s, res);
+  const st = $('stars'); st.textContent = '';
+  st.append('Score ', el('b', { text: '★'.repeat(sc.stars) + '☆'.repeat(5 - sc.stars) }), sc.stars + '/5');
+  st.setAttribute('aria-label', 'Scenario score ' + sc.stars + ' out of 5');
+  const ul = $('scoreList'); ul.textContent = '';
+  sc.crit.forEach(c => ul.append(el('li', { text: (c.ok ? '★ ' : '☆ ') + c.txt })));
+  return sc.stars;
+}
+function renderChecks(s, res) {
+  const d = s.d, out = [];
+  if (d.priceLevel >= 10 && d.elasticity > -0.4) out.push(['Price +' + d.priceLevel + '% with almost no volume loss.', 'Elasticity is ' + d.elasticity.toFixed(1) + '. Would customers really accept this without buying less?']);
+  if (d.volGrowth > 20) out.push(['Volume growth ' + d.volGrowth + '% per year.', 'What drives it: new markets, channels, capacity? Does marketing spend support it?']);
+  if (d.volLevel >= 25 && d.marketing <= baseScenario().d.marketing) out.push(['Volume +' + d.volLevel + '% over plan with no extra marketing.', 'Where do the extra customers come from?']);
+  if (d.discount > 40) out.push(['Channel discount ' + d.discount + '%.', 'Check that the channel terms are realistic for this product.']);
+  if (d.matInfl < 0 || d.labInfl < 0) out.push(['Costs fall every year.', 'Is there a concrete sourcing or productivity plan behind the falling costs?']);
+  if (d.wacc < 6) out.push(['Discount rate below 6%.', 'A low WACC makes almost any case look good. Use the company rate.']);
+  if (res.years[0].units > 0 && res.beUnits != null && res.beUnits > res.years[0].units) out.push(['Year 1 volume is below break-even.', 'You need ' + num(res.beUnits) + ' pcs to cover fixed costs, the plan has ' + num(res.years[0].units) + '.']);
+  const root = $('checks'); root.textContent = '';
+  out.forEach(([a, b]) => root.append(el('div', { class: 'check', role: 'note' }, el('span', { 'aria-hidden': 'true', text: '⚠' }), el('div', null, el('b', { text: 'Reality check: ' }), a + ' ' + b))));
+}
+
+/* ---------- KPIs ---------- */
+function renderKPIs(s, res) {
+  const d = s.d, y1 = res.years[0], H = res.years.length;
+  const items = [
+    { label: 'NPV @ ' + d.wacc + '%', val: eur(res.npv), st: res.npv > 0 ? 'good' : 'crit', sub: res.npv > 0 ? ['good', 'Creates value'] : ['crit', 'Destroys value'] },
+    { label: 'IRR', val: res.irr == null ? 'n/a' : pct(res.irr), st: res.irr == null ? 'crit' : res.irr >= d.wacc / 100 + 0.1 ? 'good' : res.irr >= d.wacc / 100 ? 'warn' : 'crit', sub: [null, 'Hurdle ' + d.wacc + '%'] },
+    { label: 'Payback', val: res.payback == null ? '> ' + H + ' y' : res.payback.toFixed(1) + ' y', st: res.payback == null ? 'crit' : res.payback <= 3 ? 'good' : 'warn', sub: [null, 'Investment ' + eur(res.capex)] },
+    { label: 'EBIT margin, year ' + Math.min(3, H), val: pct(res.ebitPct3), st: res.ebitPct3 >= 0.15 ? 'good' : res.ebitPct3 > 0 ? 'warn' : 'crit', sub: [null, 'Target 15%'] },
+    { label: 'Revenue, year 1', val: eur(y1.rev), st: '', sub: [null, num(y1.units) + ' pcs · GM ' + pct(res.gmPct1)] },
+    { label: 'Break-even volume, year 1', val: res.beUnits == null ? 'n/a' : num(res.beUnits) + ' pcs', st: res.beUnits == null ? 'crit' : res.beUnits <= y1.units * 0.8 ? 'good' : res.beUnits <= y1.units ? 'warn' : 'crit',
+      sub: [null, res.beUnits == null ? 'No positive margin' : pct(res.beUnits / Math.max(1, y1.units), 0) + ' of planned volume'] },
+  ];
+  const root = $('kpis'); root.textContent = '';
+  items.forEach(k => {
+    const sub = el('div', { class: 'k-sub' });
+    if (k.sub[0]) sub.append(el('span', { class: 'pill ' + k.sub[0], text: (k.sub[0] === 'good' ? '▲ ' : '▼ ') + k.sub[1] }));
+    else sub.append(k.sub[1]);
+    root.append(el('div', { class: 'kpi ' + k.st }, el('div', { class: 'k-label', text: k.label }), el('div', { class: 'k-val', text: k.val }), sub));
+  });
+}
+
+/* ---------- Charts ---------- */
+const charts = {};
+function baseOpts() {
+  const ink2 = css('--ink-2'), line = css('--line');
+  return {
+    responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: css('--surface'), titleColor: css('--ink'), bodyColor: css('--ink'), borderColor: css('--line-strong'), borderWidth: 1, padding: 10, boxPadding: 4, usePointStyle: true } },
+    scales: {
+      x: { grid: { display: false }, border: { color: css('--line-strong') }, ticks: { color: ink2 } },
+      y: { grid: { color: line }, border: { display: false }, ticks: { color: ink2, callback: v => eur(v) } },
+    },
+  };
+}
+function drawChart(id, cfg) {
+  const c = charts[id];
+  if (c && c.config.type === cfg.type) { c.data = cfg.data; c.options = cfg.options; c.update(); return c; }
+  if (c) c.destroy();
+  charts[id] = new Chart($(id), cfg);
+  return charts[id];
+}
+function resetCharts() { Object.keys(charts).forEach(k => { charts[k].destroy(); delete charts[k]; }); }
+Chart.defaults.font.family = '"IBM Plex Sans", system-ui, sans-serif';
+Chart.defaults.font.size = 12;
+
+/* ---------- Model tab ---------- */
+function renderModel(s, res) {
+  const ys = res.years, labels = ys.map(y => 'Y' + y.t);
+  const o = baseOpts();
+  o.plugins.tooltip.callbacks = { label: c => ' ' + eur(c.parsed.y) + '  ' + c.dataset.label };
+  drawChart('cPL', { type: 'bar', data: { labels, datasets: [
+    { type: 'line', label: 'EBIT', data: ys.map(y => y.ebit), borderColor: css('--ink'), backgroundColor: css('--ink'), borderWidth: 2, pointRadius: 4, pointBackgroundColor: css('--surface'), pointBorderWidth: 2, order: 0 },
+    { label: 'Revenue', data: ys.map(y => y.rev), backgroundColor: css('--s1'), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 36, order: 1 },
+    { label: 'Total costs', data: ys.map(y => y.vc + y.fixed + y.dep), backgroundColor: css('--s2'), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 36, order: 1 },
+  ] }, options: o });
+
+  const rows = [
+    ['Volume (pcs)', y => num(y.units)],
+    ['Revenue', y => eur(y.rev, false), 'em'],
+    ['Variable costs', y => eur(-y.vc, false)],
+    ['Gross margin', y => eur(y.gm, false), 'em'],
+    ['Gross margin %', y => pct(y.rev ? y.gm / y.rev : 0)],
+    ['Fixed costs', y => eur(-y.fixed, false)],
+    ['EBITDA', y => eur(y.ebitda, false), 'em'],
+    ['Depreciation', y => eur(-y.dep, false)],
+    ['EBIT', y => eur(y.ebit, false), 'total'],
+    ['EBIT %', y => pct(y.rev ? y.ebit / y.rev : 0)],
+    ['Tax', y => eur(-y.tax, false)],
+    ['Change in working capital', y => eur(-y.dNwc + y.release, false)],
+    ['Free cash flow', y => eur(y.fcf, false), 'total'],
+    ['Cumulative cash flow', y => eur(y.cum, false)],
+  ];
+  const t = $('plTable'); t.textContent = '';
+  const hr = el('tr', null, el('th', { text: '€' }), el('th', { text: 'Y0' }));
+  ys.forEach(y => hr.append(el('th', { text: 'Y' + y.t })));
+  t.append(el('thead', null, hr));
+  const tb = el('tbody');
+  rows.forEach(([lab, f, cls]) => {
+    const tr = el('tr', cls ? { class: cls } : null, el('td', { text: lab }));
+    let y0 = '';
+    if (lab === 'Free cash flow' || lab === 'Cumulative cash flow') y0 = eur(-res.capex, false);
+    tr.append(el('td', { text: y0, class: y0.startsWith(MINUS) ? 'neg' : '' }));
+    ys.forEach(y => { const v = f(y); tr.append(el('td', { text: v, class: v.startsWith(MINUS) && (cls === 'total' || cls === 'em' || lab.startsWith('Cumulative')) ? 'neg' : '' })); });
+    tb.append(tr);
+  });
+  t.append(tb);
+}
+
+/* ---------- Size mix tab ---------- */
+const SIZE_FIELDS = [['vol', 'Volume pcs/y', 1], ['price', 'List price €', 0.5], ['mat', 'Material €', 0.1], ['lab', 'Labour €', 0.1], ['log', 'Logistics €', 0.1]];
+function buildSizeTable() {
+  const s = active(), t = $('sizeTable'); t.textContent = '';
+  const hr = el('tr', null, el('th', { text: 'Size' }));
+  SIZE_FIELDS.forEach(f => hr.append(el('th', { text: f[1] })));
+  ['Net price', 'Unit cost', 'Unit margin', 'Margin %', 'Revenue share', 'Gross margin'].forEach(h => hr.append(el('th', { text: h })));
+  t.append(el('thead', null, hr));
+  const tb = el('tbody', { id: 'sizeBody' });
+  s.sizes.forEach((z, i) => {
+    const nameIn = el('input', { class: 'cell-in cell-name', id: 'sz-' + i + '-name', value: z.name, 'aria-label': 'Size name', maxlength: '8' });
+    nameIn.addEventListener('change', () => { z.name = nameIn.value.trim().slice(0, 8) || z.name; buildShiftSelects(); scheduleRender(); save(); });
+    const tr = el('tr', null, el('td', null, nameIn));
+    SIZE_FIELDS.forEach(([k, lab, step]) => {
+      const inp = el('input', { class: 'cell-in', type: 'number', id: 'sz-' + i + '-' + k, min: '0', step: String(step), value: String(z[k]), 'aria-label': z.name + ' ' + lab });
+      inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (isFinite(v) && v >= 0) { z[k] = v; scheduleRender(); save(); } });
+      tr.append(el('td', null, inp));
+    });
+    for (let j = 0; j < 6; j++) tr.append(el('td', { 'data-c': j }));
+    tb.append(tr);
+  });
+  tb.append(el('tr', { class: 'total', id: 'sizeTotal' }));
+  t.append(tb);
+}
+function renderMix(s, res) {
+  const y1 = res.years[0];
+  const rows = $('sizeBody').querySelectorAll('tr:not(.total)');
+  y1.sz.forEach((z, i) => {
+    const cells = rows[i].querySelectorAll('td[data-c]');
+    const vals = [eur2(z.np), eur2(z.uc), eur2(z.um), pct(z.np ? z.um / z.np : 0), pct(y1.rev ? z.rev / y1.rev : 0), eur(z.gm, false)];
+    cells.forEach((c, j) => { c.textContent = vals[j]; c.className = (j === 2 || j === 3 || j === 5) && z.um < 0 ? 'neg' : ''; });
+    if (z.um < 0) cells[2].textContent = vals[2] + ' ▼';
+  });
+  const tot = $('sizeTotal'); tot.textContent = '';
+  tot.append(el('td', { text: 'Total' }), el('td', { text: num(y1.units) }));
+  for (let j = 0; j < 4; j++) tot.append(el('td'));
+  tot.append(el('td', { text: y1.units ? eur2(y1.rev / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.vc / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.gm / y1.units) : '' }), el('td', { text: pct(res.gmPct1) }), el('td', { text: '100%' }), el('td', { text: eur(y1.gm, false) }));
+
+  const o1 = baseOpts();
+  o1.interaction = { mode: 'nearest', intersect: true };
+  o1.plugins.tooltip.callbacks = { label: c => ' ' + eur2(c.parsed.y) + ' per piece' };
+  o1.scales.y.ticks.callback = v => '€' + v;
+  drawChart('cUnit', { type: 'bar', data: { labels: y1.sz.map(z => z.name), datasets: [{ label: 'Unit margin', data: y1.sz.map(z => z.um), backgroundColor: y1.sz.map(z => z.um < 0 ? css('--crit') : css('--s1')), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 44 }] }, options: o1 });
+
+  const maxGm = Math.max(1, ...y1.sz.map(z => Math.abs(z.gm)));
+  const o2 = baseOpts();
+  o2.interaction = { mode: 'nearest', intersect: true };
+  o2.scales.x = { type: 'linear', grid: { color: css('--line') }, border: { display: false }, ticks: { color: css('--ink-2'), callback: v => num(v) }, title: { display: true, text: 'Volume, pcs per year', color: css('--muted') } };
+  o2.scales.y.ticks.callback = v => v + '%';
+  o2.scales.y.title = { display: true, text: 'Margin %', color: css('--muted') };
+  o2.layout = { padding: { top: 16, right: 24 } };
+  o2.plugins.tooltip.callbacks = { title: c => c[0].raw.name, label: c => [' ' + num(c.raw.x) + ' pcs', ' ' + c.raw.y.toFixed(1) + '% margin', ' ' + eur(c.raw.gm) + ' gross margin'] };
+  drawChart('cBubble', { type: 'bubble', data: { datasets: [{ label: 'Sizes', data: y1.sz.map(z => ({ x: z.u, y: z.np ? z.um / z.np * 100 : 0, r: 5 + 22 * Math.sqrt(Math.max(0, z.gm) / maxGm), name: z.name, gm: z.gm })),
+    backgroundColor: y1.sz.map(z => z.um < 0 ? css('--crit') + 'b0' : css('--s1') + '99'), borderColor: css('--surface'), borderWidth: 2, hoverBorderColor: css('--ink') }] },
+    options: o2, plugins: [bubbleLabels] });
+  renderShiftPreview();
+}
+const bubbleLabels = { id: 'bubbleLabels', afterDatasetsDraw(chart) {
+  const ctx = chart.ctx, meta = chart.getDatasetMeta(0);
+  ctx.save(); ctx.font = '600 11px "IBM Plex Sans", system-ui, sans-serif'; ctx.fillStyle = css('--ink'); ctx.textAlign = 'center';
+  meta.data.forEach((p, i) => { const d = chart.data.datasets[0].data[i]; ctx.fillText(d.name, p.x, p.y - (p.options.radius || 6) - 4); });
+  ctx.restore();
+} };
+
+function buildShiftSelects() {
+  const s = active(), f = $('shiftFrom'), t = $('shiftTo');
+  const fv = f.value, tv = t.value;
+  f.textContent = ''; t.textContent = '';
+  s.sizes.forEach((z, i) => { f.append(el('option', { value: i, text: z.name })); t.append(el('option', { value: i, text: z.name })); });
+  f.value = fv && fv < s.sizes.length ? fv : s.sizes.length - 1;
+  t.value = tv && tv < s.sizes.length ? tv : 2;
+}
+function shiftedScenario() {
+  const s = active(), fi = +$('shiftFrom').value, ti = +$('shiftTo').value, p = +$('shiftPct').value / 100;
+  const c = clone(s);
+  if (fi === ti) return null;
+  const moved = c.sizes[fi].vol * p;
+  c.sizes[fi].vol -= moved; c.sizes[ti].vol += moved;
+  return { c, moved };
+}
+function renderShiftPreview() {
+  $('shiftPctOut').textContent = $('shiftPct').value + '%';
+  const r = shiftedScenario(), out = $('shiftOut');
+  if (!r) { out.textContent = 'Pick two different sizes'; $('shiftApply').disabled = true; return; }
+  $('shiftApply').disabled = false;
+  const a = compute(active()), b = compute(r.c);
+  const dg = b.years[0].gm - a.years[0].gm, dn = b.npv - a.npv;
+  out.textContent = num(r.moved) + ' pcs → gross margin Y1 ' + (dg >= 0 ? '+' : MINUS) + eur(Math.abs(dg)) + ', NPV ' + (dn >= 0 ? '+' : MINUS) + eur(Math.abs(dn));
+}
+['shiftPct', 'shiftFrom', 'shiftTo'].forEach(id => $(id).addEventListener('input', renderShiftPreview));
+$('shiftApply').addEventListener('click', () => {
+  const r = shiftedScenario(); if (!r) return;
+  active().sizes = r.c.sizes.map(z => Object.assign(z, { vol: Math.round(z.vol) }));
+  buildSizeTable(); renderAll(); save();
+});
+
+/* ---------- Compare tab ---------- */
+function renderCompare() {
+  const chips = $('cmpChips'); chips.textContent = '';
+  state.compareIds = state.compareIds.filter(id => state.scenarios.some(s => s.id === id));
+  state.scenarios.forEach(s => {
+    const on = state.compareIds.includes(s.id);
+    const cb = el('input', { type: 'checkbox', id: 'cmp-' + s.id });
+    cb.checked = on; cb.disabled = !on && state.compareIds.length >= 4;
+    cb.addEventListener('change', () => {
+      if (cb.checked) state.compareIds.push(s.id); else state.compareIds = state.compareIds.filter(x => x !== s.id);
+      save(); renderCompare();
+    });
+    chips.append(el('label', { class: 'chip' + (on ? '' : ' off') }, cb, el('span', { class: 'sw', style: 'background:' + seriesColor(s.color) }), s.name));
+  });
+  const sel = state.compareIds.map(id => state.scenarios.find(s => s.id === id));
+  const results = sel.map(s => ({ s, r: compute(s), stars: null }));
+  results.forEach(x => { x.stars = scoreOf(x.s, x.r).stars; });
+
+  const metrics = [
+    ['NPV', x => x.r.npv, eur, 1],
+    ['IRR', x => x.r.irr, v => v == null ? 'n/a' : pct(v), 1, 'pp'],
+    ['Payback', x => x.r.payback, v => v == null ? 'never' : v.toFixed(1) + ' y', -1, 'y'],
+    ['Revenue Y1', x => x.r.years[0].rev, eur, 1],
+    ['Revenue final year', x => x.r.years[x.r.years.length - 1].rev, eur, 1],
+    ['Gross margin % Y1', x => x.r.gmPct1, v => pct(v), 1, 'pp'],
+    ['EBIT % Y3', x => x.r.ebitPct3, v => pct(v), 1, 'pp'],
+    ['Cumulative EBIT', x => x.r.cumEbit, eur, 1],
+    ['Break-even volume Y1', x => x.r.beUnits, v => v == null ? 'n/a' : num(v) + ' pcs', -1],
+    ['Missions complete', x => MISSIONS.filter(m => m.test(x.s, x.r).ok).length, v => v + ' / ' + MISSIONS.length, 1, 'n'],
+    ['Score', x => x.stars, v => '★'.repeat(v) + '☆'.repeat(5 - v), 1, 'n'],
+  ];
+  const t = $('cmpTable'); t.textContent = '';
+  if (!results.length) { t.append(el('tbody', null, el('tr', null, el('td', { text: 'Select at least one scenario above.' })))); }
+  else {
+    const hr = el('tr', null, el('th', { text: 'Key figure' }));
+    results.forEach(x => hr.append(el('th', null, el('span', { class: 'sw', style: 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:' + seriesColor(x.s.color) }), x.s.name)));
+    t.append(el('thead', null, hr));
+    const tb = el('tbody');
+    metrics.forEach(([lab, get, fmt, better, kind]) => {
+      const tr = el('tr', null, el('td', { text: lab }));
+      const ref = get(results[0]);
+      results.forEach((x, i) => {
+        const v = get(x), td = el('td', { text: fmt(v) });
+        if (i > 0 && v != null && ref != null) {
+          const diff = v - ref;
+          if (Math.abs(diff) > 1e-9) {
+            const good = diff * better > 0;
+            let txt;
+            if (kind === 'pp') txt = signed(diff * 100) + ' pp';
+            else if (kind === 'y') txt = signed(diff) + ' y';
+            else if (kind === 'n') txt = signed(diff, 0);
+            else if (lab.startsWith('Break-even')) txt = signed(diff, 0) + ' pcs';
+            else txt = (diff > 0 ? '+' : MINUS) + eur(Math.abs(diff));
+            td.append(el('span', { class: 'delta ' + (good ? 'up' : 'down'), text: (good ? '▲ ' : '▼ ') + txt }));
+          }
+        }
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+    t.append(tb);
+  }
+
+  const maxH = Math.max(1, ...results.map(x => x.r.years.length));
+  const legendFor = (id, line) => { const lg = $(id); lg.textContent = ''; results.forEach(x => lg.append(el('span', null, el('i', { class: line ? 'ln' : '', style: 'background:' + seriesColor(x.s.color) }), x.s.name))); };
+  legendFor('cmpLegend1', true); legendFor('cmpLegend2', false);
+
+  const o1 = baseOpts();
+  o1.plugins.tooltip.callbacks = { label: c => ' ' + eur(c.parsed.y) + '  ' + c.dataset.label };
+  drawChart('cCum', { type: 'line', data: { labels: Array.from({ length: maxH + 1 }, (_, i) => 'Y' + i), datasets: results.map(x => {
+    let c = 0; const data = x.r.cashflows.map(v => (c += v));
+    return { label: x.s.name, data, borderColor: seriesColor(x.s.color), backgroundColor: seriesColor(x.s.color), borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0 };
+  }) }, options: o1, plugins: [zeroLine] });
+
+  const o2 = baseOpts();
+  o2.plugins.tooltip.callbacks = { label: c => ' ' + eur(c.parsed.y) + '  ' + c.dataset.label };
+  drawChart('cEbit', { type: 'bar', data: { labels: Array.from({ length: maxH }, (_, i) => 'Y' + (i + 1)), datasets: results.map(x => ({
+    label: x.s.name, data: x.r.years.map(y => y.ebit), backgroundColor: seriesColor(x.s.color), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 24, borderColor: css('--surface'), borderWidth: { left: 1, right: 1 },
+  })) }, options: o2, plugins: [zeroLine] });
+  compareResults = results;
+}
+const zeroLine = { id: 'zeroLine', beforeDatasetsDraw(chart) {
+  const y = chart.scales.y; if (!y || y.min > 0 || y.max < 0) return;
+  const ctx = chart.ctx, py = y.getPixelForValue(0);
+  ctx.save(); ctx.strokeStyle = css('--line-strong'); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(chart.chartArea.left, py); ctx.lineTo(chart.chartArea.right, py); ctx.stroke(); ctx.restore();
+} };
+let compareResults = [];
+$('btnCsv').addEventListener('click', () => {
+  const lines = [];
+  const maxH = Math.max(...compareResults.map(x => x.r.years.length), 0);
+  lines.push(['Scenario', 'Metric', 'Y0', ...Array.from({ length: maxH }, (_, i) => 'Y' + (i + 1))].join(','));
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  compareResults.forEach(x => {
+    const ys = x.r.years;
+    [['Volume pcs', y => Math.round(y.units)], ['Revenue', y => Math.round(y.rev)], ['Gross margin', y => Math.round(y.gm)], ['EBITDA', y => Math.round(y.ebitda)], ['EBIT', y => Math.round(y.ebit)], ['Free cash flow', y => Math.round(y.fcf)]]
+      .forEach(([m, f]) => lines.push([q(x.s.name), q(m), m === 'Free cash flow' ? -Math.round(x.r.capex) : '', ...ys.map(f)].join(',')));
+    lines.push([q(x.s.name), q('NPV'), Math.round(x.r.npv)].join(','));
+    lines.push([q(x.s.name), q('IRR %'), x.r.irr == null ? '' : (x.r.irr * 100).toFixed(1)].join(','));
+    lines.push([q(x.s.name), q('Payback years'), x.r.payback == null ? '' : x.r.payback.toFixed(2)].join(','));
+  });
+  const csv = lines.join('\n');
+  const ta = $('csvOut'), msg = $('csvMsg');
+  ta.value = csv;
+  const fallback = () => { ta.hidden = false; ta.focus(); ta.select(); msg.textContent = 'Copying was blocked. The text is selected below: press Ctrl+C or ⌘C.'; };
+  try {
+    navigator.clipboard.writeText(csv).then(() => { msg.textContent = 'Copied ' + compareResults.length + ' scenarios. Paste into Excel or Sheets.'; ta.hidden = true; }, fallback);
+  } catch (e) { fallback(); }
+});
+
+/* ---------- Sensitivity tab ---------- */
+function renderSens(s, res) {
+  const swing = +$('sensSwing').value / 100, metric = $('sensMetric').value;
+  const base = metricOf(res, metric);
+  const rows = perturbations(s).map(p => {
+    const lo = metricOf(withChange(s, p.fn, -swing), metric), hi = metricOf(withChange(s, p.fn, swing), metric);
+    return { label: p.label, lo, hi, span: Math.abs(hi - lo) };
+  }).sort((a, b) => b.span - a.span);
+  const o = baseOpts();
+  o.indexAxis = 'y';
+  o.interaction = { mode: 'index', intersect: false, axis: 'y' };
+  o.scales = {
+    x: { grid: { color: css('--line') }, border: { display: false }, ticks: { color: css('--ink-2'), callback: v => eur(v) } },
+    y: { grid: { display: false }, border: { color: css('--line-strong') }, ticks: { color: css('--ink') } },
+  };
+  const sw = Math.round(swing * 100);
+  o.plugins.tooltip.callbacks = {
+    label: c => { const v = c.raw[1]; return ' ' + eur(v) + '  ' + c.dataset.label + '  (' + (v - base >= 0 ? '+' : MINUS) + eur(Math.abs(v - base)) + ')'; },
+  };
+  drawChart('cTornado', { type: 'bar', data: { labels: rows.map(r => r.label), datasets: [
+    { label: 'input −' + sw + '%', data: rows.map(r => [base, r.lo]), backgroundColor: css('--s1'), borderRadius: 4, borderSkipped: false, grouped: false, barPercentage: 0.75 },
+    { label: 'input +' + sw + '%', data: rows.map(r => [base, r.hi]), backgroundColor: css('--s2'), borderRadius: 4, borderSkipped: false, grouped: false, barPercentage: 0.75 },
+  ] }, options: o, plugins: [{ id: 'baseLine', afterDatasetsDraw(chart) {
+    const x = chart.scales.x, px = x.getPixelForValue(base), ctx = chart.ctx;
+    ctx.save(); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(px, chart.chartArea.top); ctx.lineTo(px, chart.chartArea.bottom); ctx.stroke(); ctx.restore();
+  } }] });
+
+  // Break-even headroom
+  const be = $('beList'); be.textContent = '';
+  const ps = perturbations(s);
+  const pick = ['Price level', 'Volume', 'Material cost', 'Fixed costs', 'CAPEX'];
+  pick.forEach(name => {
+    const p = ps.find(x => x.label === name);
+    const f = q => withChange(s, p.fn, q).npv;
+    const f0 = res.npv;
+    let found = null;
+    for (const dir of [-1, 1]) {
+      let prev = 0, fp = f0;
+      for (let q = 0.01; q <= 1.5; q += 0.01) {
+        const fq = f(dir * q);
+        if ((fp > 0) !== (fq > 0)) {
+          let a = dir * prev, b = dir * q, fa = fp;
+          for (let k = 0; k < 30; k++) { const m = (a + b) / 2, fm = f(m); if ((fa > 0) === (fm > 0)) { a = m; fa = fm; } else b = m; }
+          const root = (a + b) / 2;
+          if (found == null || Math.abs(root) < Math.abs(found)) found = root;
+          break;
+        }
+        prev = q; fp = fq;
+      }
+    }
+    let v, sub;
+    if (found == null) { v = 'Beyond ±150%'; sub = f0 > 0 ? 'NPV stays positive' : 'NPV stays negative'; }
+    else {
+      v = (found > 0 ? '+' : MINUS) + Math.abs(found * 100).toFixed(1) + '%';
+      sub = f0 > 0 ? 'NPV turns negative at this change' : 'Change needed to reach NPV 0';
+    }
+    be.append(el('div', { class: 'be' }, el('div', { class: 'be-k', text: name }), el('div', { class: 'be-v', text: v }), el('div', { class: 'be-s', text: sub })));
+  });
+
+  // Heatmap
+  const steps = [-20, -15, -10, -5, 0, 5, 10, 15, 20];
+  const grid = steps.slice().reverse().map(pp => steps.map(vv => {
+    const c = clone(s); c.d.priceLevel = lvl(c.d.priceLevel, pp / 100); c.d.volLevel = lvl(c.d.volLevel, vv / 100); return compute(c).npv;
+  }));
+  const maxAbs = Math.max(1, ...grid.flat().map(Math.abs));
+  const pos = hexRgb(css('--div-pos')), neg = hexRgb(css('--div-neg')), mid = hexRgb(css('--div-mid'));
+  const t = $('heat'); t.textContent = '';
+  const hr = el('tr', null, el('th', { text: 'Price ↓ / Volume →' }));
+  steps.forEach(v => hr.append(el('th', { text: (v > 0 ? '+' : v < 0 ? MINUS : '') + Math.abs(v) + '%' })));
+  t.append(el('thead', null, hr));
+  const tb = el('tbody');
+  steps.slice().reverse().forEach((pp, ri) => {
+    const tr = el('tr', null, el('th', { text: (pp > 0 ? '+' : pp < 0 ? MINUS : '') + Math.abs(pp) + '%' }));
+    steps.forEach((vv, ci) => {
+      const v = grid[ri][ci], k = Math.min(1, Math.abs(v) / maxAbs);
+      const rgb = mix(mid, v >= 0 ? pos : neg, Math.pow(k, 0.8));
+      const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+      const td = el('td', { text: eur(v), style: 'background:rgb(' + rgb.join(',') + ');color:' + (lum > 0.55 ? '#111' : '#fff'), title: 'Price ' + pp + '%, volume ' + vv + '%: NPV ' + eur(v, false) });
+      if (pp === 0 && vv === 0) td.className = 'cur';
+      tr.append(td);
+    });
+    tb.append(tr);
+  });
+  t.append(tb);
+}
+function hexRgb(h) { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mix(a, b, k) { return a.map((v, i) => Math.round(v + (b[i] - v) * k)); }
+['sensSwing', 'sensMetric'].forEach(id => $(id).addEventListener('change', () => renderAll()));
+
+/* ---------- Tabs ---------- */
+const TABS = ['model', 'mix', 'compare', 'sens'];
+function setTab(tab) {
+  state.tab = tab; save();
+  TABS.forEach(t => { $('p-' + t).hidden = t !== tab; $('t-' + t).setAttribute('aria-selected', String(t === tab)); });
+  renderAll();
+}
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+/* ---------- Render loop ---------- */
+let raf = 0;
+function scheduleRender() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderAll(); }); }
+function renderAll() {
+  const s = active(), res = compute(s);
+  renderKPIs(s, res);
+  renderMissions(s, res);
+  renderScore(s, res);
+  renderChecks(s, res);
+  if (state.tab === 'model') renderModel(s, res);
+  else if (state.tab === 'mix') renderMix(s, res);
+  else if (state.tab === 'compare') renderCompare();
+  else if (state.tab === 'sens') renderSens(s, res);
+}
+function buildAll() {
+  buildScenarioBar(); buildLevers(); syncLevers(); buildSizeTable(); buildShiftSelects();
+  resetCharts(); setTab(TABS.includes(state.tab) ? state.tab : 'model');
+}
+// Size table and shift selectors depend on the active scenario
+$('scenSel').addEventListener('change', () => { buildSizeTable(); buildShiftSelects(); });
+['btnNew', 'btnDup', 'btnDel'].forEach(id => $(id).addEventListener('click', () => { buildSizeTable(); buildShiftSelects(); }));
+
+const retheme = () => { resetCharts(); renderAll(); };
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme); } catch (e) {}
+new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+buildAll();
+})();
+</script>
