@@ -393,30 +393,31 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
 
 /* ---------- Defaults ---------- */
 // Two product lines in the same 7 sizes. Unit cost split: purchases 60%, in-house labour 28%, overhead 12%.
-// E-series (premium): unit cost = 60% of net price (list less 25% channel discount) -> 40% gross margin. 6,000 pcs/y.
-// P-series (performance, mid-tier): list price ~70% of E, 15% gross margin. 4,000 pcs/y. Both peak in the middle sizes.
+// E-series (premium): list price €2,000 (E01) to €10,000 (E14), linear in size number. Unit cost = 60% of net price
+// (list less 25% channel discount) -> 40% gross margin. 6,000 pcs/y, peaking in the middle sizes.
+// P-series (performance, mid-tier): list price 85% of the same E size, 15% gross margin, 1,500 pcs/y.
 const DEFAULT_SIZES = [
   { line: 'E', name: 'E01', vol: 400, price: 2000, mat: 540, lab: 252, log: 108 },
-  { line: 'E', name: 'E02', vol: 750, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
-  { line: 'E', name: 'E04', vol: 1150, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
-  { line: 'E', name: 'E06', vol: 1400, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
-  { line: 'E', name: 'E08', vol: 1150, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
-  { line: 'E', name: 'E10', vol: 750, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
-  { line: 'E', name: 'E14', vol: 400, price: 14000, mat: 3780, lab: 1764, log: 756 },
-  { line: 'P', name: 'P01', vol: 250, price: 1400, mat: 535.5, lab: 249.9, log: 107.1 },
-  { line: 'P', name: 'P02', vol: 500, price: 2150, mat: 822.4, lab: 383.8, log: 164.5 },
-  { line: 'P', name: 'P04', vol: 750, price: 3700, mat: 1415.2, lab: 660.5, log: 283.1 },
-  { line: 'P', name: 'P06', vol: 1000, price: 5200, mat: 1989, lab: 928.2, log: 397.8 },
-  { line: 'P', name: 'P08', vol: 750, price: 6750, mat: 2581.9, lab: 1204.9, log: 516.4 },
-  { line: 'P', name: 'P10', vol: 500, price: 8250, mat: 3155.6, lab: 1472.6, log: 631.1 },
-  { line: 'P', name: 'P14', vol: 250, price: 9800, mat: 3748.5, lab: 1749.3, log: 749.7 },
+  { line: 'E', name: 'E02', vol: 750, price: 2600, mat: 702, lab: 327.6, log: 140.4 },
+  { line: 'E', name: 'E04', vol: 1150, price: 3850, mat: 1039.5, lab: 485.1, log: 207.9 },
+  { line: 'E', name: 'E06', vol: 1400, price: 5100, mat: 1377, lab: 642.6, log: 275.4 },
+  { line: 'E', name: 'E08', vol: 1150, price: 6300, mat: 1701, lab: 793.8, log: 340.2 },
+  { line: 'E', name: 'E10', vol: 750, price: 7550, mat: 2038.5, lab: 951.3, log: 407.7 },
+  { line: 'E', name: 'E14', vol: 400, price: 10000, mat: 2700, lab: 1260, log: 540 },
+  { line: 'P', name: 'P01', vol: 100, price: 1700, mat: 650.2, lab: 303.5, log: 130 },
+  { line: 'P', name: 'P02', vol: 190, price: 2210, mat: 845.3, lab: 394.5, log: 169.1 },
+  { line: 'P', name: 'P04', vol: 285, price: 3272.5, mat: 1251.7, lab: 584.1, log: 250.3 },
+  { line: 'P', name: 'P06', vol: 350, price: 4335, mat: 1658.1, lab: 773.8, log: 331.6 },
+  { line: 'P', name: 'P08', vol: 285, price: 5355, mat: 2048.3, lab: 955.9, log: 409.7 },
+  { line: 'P', name: 'P10', vol: 190, price: 6417.5, mat: 2454.7, lab: 1145.5, log: 490.9 },
+  { line: 'P', name: 'P14', vol: 100, price: 8500, mat: 3251.2, lab: 1517.3, log: 650.2 },
 ];
 const LINES = { E: 'E-series · premium', P: 'P-series · performance' };
 const BASE_D = {
   volLevel: 0, volGrowth: 6, elasticity: -1.2,
   priceLevel: 0, priceChange: 2, discount: 25,
   matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
-  staff: 5200, marketing: 2200, rnd: 1750, other: 900, fixedInfl: 2.5,
+  staff: 1000, marketing: 400, rnd: 400, other: 200, fixedInfl: 2.5,
   capex: 12000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
   pActive: 1, migration: 20, pSaving: 0,
 };
@@ -469,7 +470,7 @@ const LEVERS = [
 const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
 
 /* ---------- State ---------- */
-const STORE_KEY = 'bcl.v4';
+const STORE_KEY = 'bcl.v5';
 const clone = o => JSON.parse(JSON.stringify(o));
 let uid = 1;
 function makeScenario(name, dOverrides, sizes, colorIdx) {
@@ -826,7 +827,7 @@ function renderChecks(s, res) {
   if (d.volLevel >= 25 && d.marketing <= baseScenario().d.marketing) out.push(['Volume +' + d.volLevel + '% over plan with no extra marketing.', 'Where do the extra customers come from?']);
   if (d.discount > 40) out.push(['Channel discount ' + d.discount + '%.', 'Check that the channel terms are realistic for this product.']);
   if (d.matInfl < 0 || d.labInfl < 0) out.push(['Costs fall every year.', 'Is there a concrete sourcing or productivity plan behind the falling costs?']);
-  if (!d.pActive && d.migration > 60) out.push([d.migration + '% of P buyers switch to E.', 'E costs about 40% more than P. Would that many customers really trade up instead of going to a competitor?']);
+  if (!d.pActive && d.migration > 60) out.push([d.migration + '% of P buyers switch to E.', 'E costs about 18% more than P. Would that many customers really trade up instead of going to a competitor?']);
   if (!d.pActive && d.pSaving > 0 && d.migration > 0) out.push(['Fixed cost saving of ' + eur(d.pSaving * 1000) + ' per year without P.', 'Name the concrete costs that disappear: people, tooling, inventory, sales support.']);
   if (d.wacc < 6) out.push(['Discount rate below 6%.', 'A low WACC makes almost any case look good. Use the company rate.']);
   if (res.years[0].units > 0 && res.beUnits != null && res.beUnits > res.years[0].units) out.push(['Year 1 volume is below break-even.', 'You need ' + num(res.beUnits) + ' pcs to cover fixed costs, the plan has ' + num(res.years[0].units) + '.']);
