@@ -352,22 +352,22 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
 
 /* ---------- Defaults ---------- */
 // Unit cost = 60% of net price (list less 25% channel discount) -> 40% gross margin in Base.
-// Split: purchases 60%, in-house labour 28%, overhead 12%.
+// Split: purchases 60%, in-house labour 28%, overhead 12%. Volume 6,000 pcs/y, peaking in the middle sizes.
 const DEFAULT_SIZES = [
-  { name: 'E01', vol: 600, price: 2000, mat: 540, lab: 252, log: 108 },
-  { name: 'E02', vol: 450, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
-  { name: 'E04', vol: 300, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
-  { name: 'E06', vol: 180, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
-  { name: 'E08', vol: 110, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
-  { name: 'E10', vol: 60, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
-  { name: 'E12', vol: 25, price: 14000, mat: 3780, lab: 1764, log: 756 },
+  { name: 'E01', vol: 400, price: 2000, mat: 540, lab: 252, log: 108 },
+  { name: 'E02', vol: 750, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
+  { name: 'E04', vol: 1150, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
+  { name: 'E06', vol: 1400, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
+  { name: 'E08', vol: 1150, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
+  { name: 'E10', vol: 750, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
+  { name: 'E14', vol: 400, price: 14000, mat: 3780, lab: 1764, log: 756 },
 ];
 const BASE_D = {
   volLevel: 0, volGrowth: 6, elasticity: -1.2,
   priceLevel: 0, priceChange: 2, discount: 25,
   matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
-  staff: 750, marketing: 300, rnd: 300, other: 150, fixedInfl: 2.5,
-  capex: 2000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
+  staff: 4450, marketing: 1800, rnd: 1750, other: 900, fixedInfl: 2.5,
+  capex: 12000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
 };
 const PRESETS = [
   { name: 'Base', d: {} },
@@ -394,14 +394,14 @@ const LEVERS = [
     { k: 'labInfl', label: 'In-house labour & overhead inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
   ]},
   { group: 'Fixed costs per year', items: [
-    { k: 'staff', label: 'Staff', min: 0, max: 1500, step: 10, unit: 'k€' },
-    { k: 'marketing', label: 'Marketing', min: 0, max: 1000, step: 10, unit: 'k€' },
-    { k: 'rnd', label: 'Product development', min: 0, max: 1000, step: 10, unit: 'k€' },
-    { k: 'other', label: 'Other fixed', min: 0, max: 600, step: 10, unit: 'k€' },
+    { k: 'staff', label: 'Staff', min: 0, max: 10000, step: 50, unit: 'k€' },
+    { k: 'marketing', label: 'Marketing', min: 0, max: 5000, step: 50, unit: 'k€' },
+    { k: 'rnd', label: 'Product development', min: 0, max: 5000, step: 50, unit: 'k€' },
+    { k: 'other', label: 'Other fixed', min: 0, max: 3000, step: 50, unit: 'k€' },
     { k: 'fixedInfl', label: 'Fixed cost inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
   ]},
   { group: 'Investment & finance', items: [
-    { k: 'capex', label: 'Investment (CAPEX)', min: 0, max: 5000, step: 50, unit: 'k€' },
+    { k: 'capex', label: 'Investment (CAPEX)', min: 0, max: 30000, step: 100, unit: 'k€' },
     { k: 'depYears', label: 'Depreciation period', min: 1, max: 15, step: 1, unit: 'years' },
     { k: 'nwc', label: 'Working capital', min: 0, max: 40, step: 1, unit: '% rev.' },
     { k: 'tax', label: 'Corporate tax', min: 0, max: 40, step: 1, unit: '%' },
@@ -412,7 +412,7 @@ const LEVERS = [
 const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
 
 /* ---------- State ---------- */
-const STORE_KEY = 'bcl.v2';
+const STORE_KEY = 'bcl.v3';
 const clone = o => JSON.parse(JSON.stringify(o));
 let uid = 1;
 function makeScenario(name, dOverrides, sizes, colorIdx) {
