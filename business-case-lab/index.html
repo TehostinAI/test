@@ -385,11 +385,11 @@ const LEVERS = [
     { k: 'discount', label: 'Channel discount', min: 0, max: 50, step: 1, unit: '%' },
   ]},
   { group: 'Unit cost', items: [
-    { k: 'matLevel', label: 'Material cost', min: -30, max: 30, step: 1, unit: '%' },
-    { k: 'labLevel', label: 'Labour cost', min: -30, max: 30, step: 1, unit: '%' },
-    { k: 'logLevel', label: 'Logistics cost', min: -30, max: 30, step: 1, unit: '%' },
-    { k: 'matInfl', label: 'Material inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
-    { k: 'labInfl', label: 'Labour & logistics inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
+    { k: 'matLevel', label: 'Purchases cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'labLevel', label: 'In-house labour cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'logLevel', label: 'Overhead cost', min: -30, max: 30, step: 1, unit: '%' },
+    { k: 'matInfl', label: 'Purchases inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
+    { k: 'labInfl', label: 'In-house labour & overhead inflation', min: -5, max: 15, step: 0.5, unit: '%/y' },
   ]},
   { group: 'Fixed costs per year', items: [
     { k: 'staff', label: 'Staff', min: 0, max: 1500, step: 10, unit: 'k€' },
@@ -529,9 +529,9 @@ function perturbations(s) {
   return [
     { label: 'Volume', fn: (c, p) => { c.d.volLevel = lvl(c.d.volLevel, p); } },
     { label: 'Price level', fn: (c, p) => { c.d.priceLevel = lvl(c.d.priceLevel, p); } },
-    { label: 'Material cost', fn: (c, p) => { c.d.matLevel = lvl(c.d.matLevel, p); } },
-    { label: 'Labour cost', fn: (c, p) => { c.d.labLevel = lvl(c.d.labLevel, p); } },
-    { label: 'Logistics cost', fn: (c, p) => { c.d.logLevel = lvl(c.d.logLevel, p); } },
+    { label: 'Purchases cost', fn: (c, p) => { c.d.matLevel = lvl(c.d.matLevel, p); } },
+    { label: 'In-house labour cost', fn: (c, p) => { c.d.labLevel = lvl(c.d.labLevel, p); } },
+    { label: 'Overhead cost', fn: (c, p) => { c.d.logLevel = lvl(c.d.logLevel, p); } },
     { label: 'Fixed costs', fn: (c, p) => { ['staff', 'marketing', 'rnd', 'other'].forEach(k => c.d[k] *= 1 + p); } },
     { label: 'CAPEX', fn: (c, p) => { c.d.capex *= 1 + p; } },
     { label: 'WACC', fn: (c, p) => { c.d.wacc *= 1 + p; } },
@@ -691,7 +691,7 @@ const MISSIONS = [
     test: (s, r) => ({ ok: r.payback != null && r.payback <= 3 && s.d.priceLevel <= 5, now: 'Now ' + yrs(r.payback) + ', price ' + signed(s.d.priceLevel, 0) + '%' }) },
   { id: 'm3', title: 'Every size pays its way', desc: 'Keep a positive unit margin on all sizes in year 1, or drop the loss-maker (set its volume to 0).',
     test: (s, r) => { const bad = r.years[0].sz.filter(z => z.u > 0 && z.um <= 0); return { ok: bad.length === 0, now: bad.length ? 'Loss-making: ' + bad.map(z => z.name).join(', ') : 'All sizes positive' }; } },
-  { id: 'm4', title: 'Shock-proof', desc: 'NPV stays positive even if material cost jumps +20%.',
+  { id: 'm4', title: 'Shock-proof', desc: 'NPV stays positive even if purchases cost jumps +20%.',
     test: (s, r) => { const n = withChange(s, (c) => { c.d.matLevel = lvl(c.d.matLevel, 0.2); }, 0).npv; return { ok: n > 0, now: 'Shocked NPV ' + eur(n) }; } },
   { id: 'm5', title: 'Value creator', desc: 'Reach an IRR of 25% or more.',
     test: (s, r) => ({ ok: r.irr != null && r.irr >= 0.25, now: 'Now ' + (r.irr == null ? 'n/a' : pct(r.irr)) }) },
@@ -826,7 +826,7 @@ function renderModel(s, res) {
 }
 
 /* ---------- Size mix tab ---------- */
-const SIZE_FIELDS = [['vol', 'Volume pcs/y', 1], ['price', 'List price €', 0.5], ['mat', 'Material €', 0.1], ['lab', 'Labour €', 0.1], ['log', 'Logistics €', 0.1]];
+const SIZE_FIELDS = [['vol', 'Volume pcs/y', 1], ['price', 'List price €', 0.5], ['mat', 'Purchases €', 0.1], ['lab', 'In-house labour €', 0.1], ['log', 'Overhead €', 0.1]];
 function buildSizeTable() {
   const s = active(), t = $('sizeTable'); t.textContent = '';
   const hr = el('tr', null, el('th', { text: 'Size' }));
@@ -1061,7 +1061,7 @@ function renderSens(s, res) {
   // Break-even headroom
   const be = $('beList'); be.textContent = '';
   const ps = perturbations(s);
-  const pick = ['Price level', 'Volume', 'Material cost', 'Fixed costs', 'CAPEX'];
+  const pick = ['Price level', 'Volume', 'Purchases cost', 'Fixed costs', 'CAPEX'];
   pick.forEach(name => {
     const p = ps.find(x => x.label === name);
     const f = q => withChange(s, p.fn, q).npv;
