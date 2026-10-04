@@ -245,10 +245,10 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
       <!-- MODEL -->
       <section class="panel" id="p-model" role="tabpanel">
         <div class="card">
-          <h3>Revenue, costs and EBIT</h3>
+          <h3>Revenue, costs and EBITA</h3>
           <div class="sub">Total costs = variable costs + fixed costs + depreciation</div>
-          <div class="legend"><span><i style="background:var(--s1)"></i>Revenue</span><span><i style="background:var(--s2)"></i>Total costs</span><span><i class="ln" style="background:var(--ink)"></i>EBIT</span></div>
-          <div class="chart-box"><canvas id="cPL" aria-label="Revenue, costs and EBIT by year" role="img"></canvas></div>
+          <div class="legend"><span><i style="background:var(--s1)"></i>Revenue</span><span><i style="background:var(--s2)"></i>Total costs</span><span><i class="ln" style="background:var(--ink)"></i>EBITA</span></div>
+          <div class="chart-box"><canvas id="cPL" aria-label="Revenue, costs and EBITA by year" role="img"></canvas></div>
         </div>
         <div class="card">
           <h3>Income statement and cash flow</h3>
@@ -339,9 +339,9 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
             <div class="chart-box"><canvas id="cCum" role="img" aria-label="Cumulative cash flow by scenario"></canvas></div>
           </div>
           <div class="card">
-            <h3>EBIT by year</h3>
+            <h3>EBITA by year</h3>
             <div class="legend" id="cmpLegend2"></div>
-            <div class="chart-box"><canvas id="cEbit" role="img" aria-label="EBIT by year and scenario"></canvas></div>
+            <div class="chart-box"><canvas id="cEbit" role="img" aria-label="EBITA by year and scenario"></canvas></div>
           </div>
         </div>
         <div class="card">
@@ -359,7 +359,7 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
               <select id="sensSwing"><option value="5">±5%</option><option value="10" selected>±10%</option><option value="20">±20%</option></select>
             </label>
             <label>Measure
-              <select id="sensMetric"><option value="npv" selected>NPV</option><option value="ebit3">EBIT, year 3</option><option value="cumEbit">Cumulative EBIT</option></select>
+              <select id="sensMetric"><option value="npv" selected>NPV</option><option value="ebit3">EBITA, year 3</option><option value="cumEbit">Cumulative EBITA</option></select>
             </label>
           </div>
         </div>
@@ -382,7 +382,7 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
         </div>
       </section>
 
-      <p class="foot-note">Example data is fictional. Scenarios are saved in this browser only. NPV uses after-tax free cash flow with working capital released in the final year and no terminal value.</p>
+      <p class="foot-note">Example data is fictional. Scenarios are saved in this browser only. Fixed costs start at 14% of Base revenue. EBITA equals EBIT here as there is no amortisation. NPV uses after-tax free cash flow with working capital released in the final year and no terminal value.</p>
     </main>
   </div>
 </div>
@@ -417,8 +417,8 @@ const BASE_D = {
   volLevel: 0, volGrowth: 6, elasticity: -1.2,
   priceLevel: 0, priceChange: 2, discount: 25,
   matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
-  staff: 1000, marketing: 400, rnd: 400, other: 200, fixedInfl: 2.5,
-  capex: 12000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
+  staff: 1975, marketing: 800, rnd: 800, other: 400, fixedInfl: 2.5,
+  capex: 4000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
   pActive: 1, migration: 20, pSaving: 0,
 };
 const PRESETS = [
@@ -470,7 +470,7 @@ const LEVERS = [
 const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
 
 /* ---------- State ---------- */
-const STORE_KEY = 'bcl.v5';
+const STORE_KEY = 'bcl.v6';
 const clone = o => JSON.parse(JSON.stringify(o));
 let uid = 1;
 function makeScenario(name, dOverrides, sizes, colorIdx) {
@@ -770,14 +770,14 @@ function scoreOf(s, res) {
     { ok: res.npv > 0, txt: 'NPV is positive' },
     { ok: res.irr != null && res.irr >= s.d.wacc / 100 + 0.10, txt: 'IRR beats WACC by 10 points or more' },
     { ok: res.payback != null && res.payback <= 3, txt: 'Payback within 3 years' },
-    { ok: res.ebitPct3 >= 0.15, txt: 'EBIT margin of 15% or more in year 3' },
+    { ok: res.ebitPct3 >= 0.20, txt: 'EBITA margin of 20% or more in year 3' },
     { ok: Math.min(...swing) > 0, txt: 'NPV stays positive when any single driver moves ±10%' },
   ];
   return { stars: crit.filter(c => c.ok).length, crit };
 }
 const MISSIONS = [
-  { id: 'm1', title: 'Margin builder', desc: 'Reach an EBIT margin of 15% or more in year 3.',
-    test: (s, r) => ({ ok: r.ebitPct3 >= 0.15, now: 'Now ' + pct(r.ebitPct3) }) },
+  { id: 'm1', title: 'Margin builder', desc: 'Reach an EBITA margin of 20% or more in year 3.',
+    test: (s, r) => ({ ok: r.ebitPct3 >= 0.20, now: 'Now ' + pct(r.ebitPct3) }) },
   { id: 'm2', title: 'Fast payback', desc: 'Pay back the investment within 3 years without raising price level more than +5%.',
     test: (s, r) => ({ ok: r.payback != null && r.payback <= 3 && s.d.priceLevel <= 5, now: 'Now ' + yrs(r.payback) + ', price ' + signed(s.d.priceLevel, 0) + '%' }) },
   { id: 'm3', title: 'Every size pays its way', desc: 'Keep a positive unit margin on all sizes in year 1, or drop the loss-maker (set its volume to 0).',
@@ -842,7 +842,7 @@ function renderKPIs(s, res) {
     { label: 'NPV @ ' + d.wacc + '%', val: eur(res.npv), st: res.npv > 0 ? 'good' : 'crit', sub: res.npv > 0 ? ['good', 'Creates value'] : ['crit', 'Destroys value'] },
     { label: 'IRR', val: res.irr == null ? 'n/a' : pct(res.irr), st: res.irr == null ? 'crit' : res.irr >= d.wacc / 100 + 0.1 ? 'good' : res.irr >= d.wacc / 100 ? 'warn' : 'crit', sub: [null, 'Hurdle ' + d.wacc + '%'] },
     { label: 'Payback', val: res.payback == null ? '> ' + H + ' y' : res.payback.toFixed(1) + ' y', st: res.payback == null ? 'crit' : res.payback <= 3 ? 'good' : 'warn', sub: [null, 'Investment ' + eur(res.capex)] },
-    { label: 'EBIT margin, year ' + Math.min(3, H), val: pct(res.ebitPct3), st: res.ebitPct3 >= 0.15 ? 'good' : res.ebitPct3 > 0 ? 'warn' : 'crit', sub: [null, 'Target 15%'] },
+    { label: 'EBITA margin, year ' + Math.min(3, H), val: pct(res.ebitPct3), st: res.ebitPct3 >= 0.20 ? 'good' : res.ebitPct3 > 0 ? 'warn' : 'crit', sub: [null, 'Target 20%'] },
     { label: 'Revenue, year 1', val: eur(y1.rev), st: '', sub: [null, 'E ' + num(y1.lines.E.units) + ' · P ' + (d.pActive ? num(y1.lines.P.units) : 'off') + ' pcs · GM ' + pct(res.gmPct1)] },
     { label: 'Break-even volume, year 1', val: res.beUnits == null ? 'n/a' : num(res.beUnits) + ' pcs', st: res.beUnits == null ? 'crit' : res.beUnits <= y1.units * 0.8 ? 'good' : res.beUnits <= y1.units ? 'warn' : 'crit',
       sub: [null, res.beUnits == null ? 'No positive margin' : pct(res.beUnits / Math.max(1, y1.units), 0) + ' of planned volume'] },
@@ -887,7 +887,7 @@ function renderModel(s, res) {
   const o = baseOpts();
   o.plugins.tooltip.callbacks = { label: c => ' ' + eur(c.parsed.y) + '  ' + c.dataset.label };
   drawChart('cPL', { type: 'bar', data: { labels, datasets: [
-    { type: 'line', label: 'EBIT', data: ys.map(y => y.ebit), borderColor: css('--ink'), backgroundColor: css('--ink'), borderWidth: 2, pointRadius: 4, pointBackgroundColor: css('--surface'), pointBorderWidth: 2, order: 0 },
+    { type: 'line', label: 'EBITA', data: ys.map(y => y.ebit), borderColor: css('--ink'), backgroundColor: css('--ink'), borderWidth: 2, pointRadius: 4, pointBackgroundColor: css('--surface'), pointBorderWidth: 2, order: 0 },
     { label: 'Revenue', data: ys.map(y => y.rev), backgroundColor: css('--s1'), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 36, order: 1 },
     { label: 'Total costs', data: ys.map(y => y.vc + y.fixed + y.dep), backgroundColor: css('--s2'), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 36, order: 1 },
   ] }, options: o });
@@ -901,8 +901,8 @@ function renderModel(s, res) {
     ['Fixed costs', y => eur(-y.fixed, false)],
     ['EBITDA', y => eur(y.ebitda, false), 'em'],
     ['Depreciation', y => eur(-y.dep, false)],
-    ['EBIT', y => eur(y.ebit, false), 'total'],
-    ['EBIT %', y => pct(y.rev ? y.ebit / y.rev : 0)],
+    ['EBITA', y => eur(y.ebit, false), 'total'],
+    ['EBITA %', y => pct(y.rev ? y.ebit / y.rev : 0)],
     ['Tax', y => eur(-y.tax, false)],
     ['Change in working capital', y => eur(-y.dNwc + y.release, false)],
     ['Free cash flow', y => eur(y.fcf, false), 'total'],
@@ -1065,7 +1065,7 @@ function renderLines(s, res) {
   // Break-even switching rates
   const targets = [
     ['Gross margin, year 1', r => r.years[0].gm],
-    ['EBIT, year 1', r => r.years[0].ebit],
+    ['EBITA, year 1', r => r.years[0].ebit],
     ['NPV', r => r.npv],
   ];
   const dl = $('dropList'); dl.textContent = '';
@@ -1152,8 +1152,8 @@ function renderCompare() {
     ['Revenue Y1', x => x.r.years[0].rev, eur, 1],
     ['Revenue final year', x => x.r.years[x.r.years.length - 1].rev, eur, 1],
     ['Gross margin % Y1', x => x.r.gmPct1, v => pct(v), 1, 'pp'],
-    ['EBIT % Y3', x => x.r.ebitPct3, v => pct(v), 1, 'pp'],
-    ['Cumulative EBIT', x => x.r.cumEbit, eur, 1],
+    ['EBITA % Y3', x => x.r.ebitPct3, v => pct(v), 1, 'pp'],
+    ['Cumulative EBITA', x => x.r.cumEbit, eur, 1],
     ['Break-even volume Y1', x => x.r.beUnits, v => v == null ? 'n/a' : num(v) + ' pcs', -1],
     ['Missions complete', x => MISSIONS.filter(m => m.test(x.s, x.r).ok).length, v => v + ' / ' + MISSIONS.length, 1, 'n'],
     ['Score', x => x.stars, v => '★'.repeat(v) + '☆'.repeat(5 - v), 1, 'n'],
@@ -1222,7 +1222,7 @@ $('btnCsv').addEventListener('click', () => {
   const q = v => '"' + String(v).replace(/"/g, '""') + '"';
   compareResults.forEach(x => {
     const ys = x.r.years;
-    [['Volume pcs', y => Math.round(y.units)], ['E-series pcs', y => Math.round(y.lines.E.units)], ['P-series pcs', y => Math.round(y.lines.P.units)], ['Revenue', y => Math.round(y.rev)], ['Gross margin', y => Math.round(y.gm)], ['EBITDA', y => Math.round(y.ebitda)], ['EBIT', y => Math.round(y.ebit)], ['Free cash flow', y => Math.round(y.fcf)]]
+    [['Volume pcs', y => Math.round(y.units)], ['E-series pcs', y => Math.round(y.lines.E.units)], ['P-series pcs', y => Math.round(y.lines.P.units)], ['Revenue', y => Math.round(y.rev)], ['Gross margin', y => Math.round(y.gm)], ['EBITDA', y => Math.round(y.ebitda)], ['EBITA', y => Math.round(y.ebit)], ['Free cash flow', y => Math.round(y.fcf)]]
       .forEach(([m, f]) => lines.push([q(x.s.name), q(m), m === 'Free cash flow' ? -Math.round(x.r.capex) : '', ...ys.map(f)].join(',')));
     lines.push([q(x.s.name), q('NPV'), Math.round(x.r.npv)].join(','));
     lines.push([q(x.s.name), q('IRR %'), x.r.irr == null ? '' : (x.r.irr * 100).toFixed(1)].join(','));
