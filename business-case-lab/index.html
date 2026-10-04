@@ -351,21 +351,23 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
 'use strict';
 
 /* ---------- Defaults ---------- */
+// Unit cost = 60% of net price (list less 25% channel discount) -> 40% gross margin in Base.
+// Split: purchases 60%, in-house labour 28%, overhead 12%.
 const DEFAULT_SIZES = [
-  { name: 'E01', vol: 18000, price: 42,  mat: 13,  lab: 6,  log: 2 },
-  { name: 'E02', vol: 15000, price: 58,  mat: 18,  lab: 7,  log: 2.5 },
-  { name: 'E04', vol: 12000, price: 79,  mat: 26,  lab: 9,  log: 3.2 },
-  { name: 'E06', vol: 8500,  price: 108, mat: 37,  lab: 12, log: 4.5 },
-  { name: 'E08', vol: 5200,  price: 149, mat: 55,  lab: 16, log: 6.5 },
-  { name: 'E10', vol: 2600,  price: 205, mat: 84,  lab: 22, log: 9.5 },
-  { name: 'E12', vol: 900,   price: 289, mat: 158, lab: 34, log: 14 },
+  { name: 'E01', vol: 600, price: 2000, mat: 540, lab: 252, log: 108 },
+  { name: 'E02', vol: 450, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
+  { name: 'E04', vol: 300, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
+  { name: 'E06', vol: 180, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
+  { name: 'E08', vol: 110, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
+  { name: 'E10', vol: 60, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
+  { name: 'E12', vol: 25, price: 14000, mat: 3780, lab: 1764, log: 756 },
 ];
 const BASE_D = {
   volLevel: 0, volGrowth: 6, elasticity: -1.2,
   priceLevel: 0, priceChange: 2, discount: 25,
   matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
-  staff: 380, marketing: 180, rnd: 120, other: 90, fixedInfl: 2.5,
-  capex: 1200, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
+  staff: 750, marketing: 300, rnd: 300, other: 150, fixedInfl: 2.5,
+  capex: 2000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
 };
 const PRESETS = [
   { name: 'Base', d: {} },
@@ -410,7 +412,7 @@ const LEVERS = [
 const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
 
 /* ---------- State ---------- */
-const STORE_KEY = 'bcl.v1';
+const STORE_KEY = 'bcl.v2';
 const clone = o => JSON.parse(JSON.stringify(o));
 let uid = 1;
 function makeScenario(name, dOverrides, sizes, colorIdx) {
@@ -552,7 +554,7 @@ function eur(v, short = true) {
   if (a >= 1e3) return sg + '€' + (a / 1e3).toFixed(0) + 'k';
   return sg + '€' + a.toFixed(0);
 }
-const eur2 = v => (v < 0 ? MINUS : '') + '€' + Math.abs(v).toFixed(2);
+const eur2 = v => (v < 0 ? MINUS : '') + '€' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: Math.abs(v) >= 100 ? 0 : 2, maximumFractionDigits: Math.abs(v) >= 100 ? 0 : 2 });
 const pct = (v, dp = 1) => v == null || !isFinite(v) ? '–' : (v < 0 ? MINUS : '') + Math.abs(v * 100).toFixed(dp) + '%';
 const num = v => Math.round(v).toLocaleString('en-US');
 const yrs = v => v == null ? 'never' : v.toFixed(1) + ' y';
@@ -874,6 +876,7 @@ function renderMix(s, res) {
   o2.interaction = { mode: 'nearest', intersect: true };
   o2.scales.x = { type: 'linear', grid: { color: css('--line') }, border: { display: false }, ticks: { color: css('--ink-2'), callback: v => num(v) }, title: { display: true, text: 'Volume, pcs per year', color: css('--muted') } };
   o2.scales.y.ticks.callback = v => v + '%';
+  o2.scales.y.suggestedMin = 0; o2.scales.y.suggestedMax = 60;
   o2.scales.y.title = { display: true, text: 'Margin %', color: css('--muted') };
   o2.layout = { padding: { top: 16, right: 24 } };
   o2.plugins.tooltip.callbacks = { title: c => c[0].raw.name, label: c => [' ' + num(c.raw.x) + ' pcs', ' ' + c.raw.y.toFixed(1) + '% margin', ' ' + eur(c.raw.gm) + ' gross margin'] };
