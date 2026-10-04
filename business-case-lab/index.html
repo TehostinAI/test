@@ -86,6 +86,14 @@ select, .txt { background: var(--surface); border: 1px solid var(--line-strong);
 .lv-val input.changed { border-color: var(--accent); background: var(--accent-soft); }
 .lv-val span { font-size: 11px; color: var(--muted); min-width: 34px; }
 .lv-hint { font-size: 11px; color: var(--muted); }
+.lever.dim { opacity: .45; }
+.lever.toggle { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; position: relative; }
+.lever.toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch { width: 38px; height: 22px; border-radius: 999px; background: var(--line-strong); position: relative; transition: background .2s; flex: none; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); transition: transform .2s; }
+.lever.toggle input:checked + .switch { background: var(--accent); }
+.lever.toggle input:checked + .switch::after { transform: translateX(16px); }
+.lever.toggle input:focus-visible + .switch { outline: 2px solid var(--accent); outline-offset: 2px; }
 input[type=range] { width: 100%; accent-color: var(--accent); margin: 0; height: 20px; }
 .lv-foot { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
 
@@ -149,6 +157,9 @@ th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--lin
 th:first-child, td:first-child { text-align: left; }
 thead th { font-size: 11px; font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; border-bottom-color: var(--line-strong); }
 tr.total td { font-weight: 600; border-top: 1px solid var(--line-strong); }
+tr.line-head td { padding-top: 14px; font-family: var(--font-display); font-stretch: 90%; font-weight: 700; font-size: 13px; letter-spacing: .03em; color: var(--ink-2); text-transform: uppercase; }
+tr.off td { opacity: .45; }
+.delta { color: var(--ink-2); }
 tr.em td { font-weight: 600; }
 td.neg { color: var(--crit); }
 .cell-in { width: 82px; text-align: right; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); font-family: var(--font-mono); font-size: 12px; }
@@ -192,7 +203,7 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">E–</div>
       <div>
-        <div class="eyebrow">E-series · 7 sizes · 5-year case · €</div>
+        <div class="eyebrow">E &amp; P series · 7 sizes each · 5-year case · €</div>
         <h1>Business Case Lab</h1>
       </div>
     </div>
@@ -226,6 +237,7 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
       <nav class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="model" id="t-model" type="button">Model</button>
         <button class="tab" role="tab" data-tab="mix" id="t-mix" type="button">Size mix</button>
+        <button class="tab" role="tab" data-tab="lines" id="t-lines" type="button">Product lines</button>
         <button class="tab" role="tab" data-tab="compare" id="t-compare" type="button">Compare scenarios</button>
         <button class="tab" role="tab" data-tab="sens" id="t-sens" type="button">Sensitivity</button>
       </nav>
@@ -276,6 +288,35 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
             <div class="sub">Volume vs. margin %. Bubble area = total gross margin €</div>
             <div class="chart-box"><canvas id="cBubble" role="img" aria-label="Volume versus margin per size"></canvas></div>
           </div>
+        </div>
+      </section>
+
+      <!-- PRODUCT LINES -->
+      <section class="panel" id="p-lines" role="tabpanel" hidden>
+        <div class="card">
+          <h3>E-series and P-series, year 1</h3>
+          <div class="sub">Both lines share the same fixed costs, investment and levers.</div>
+          <div class="tbl-wrap"><table id="lineTable"></table></div>
+        </div>
+        <div class="card">
+          <h3>What if the P-series is taken off sale?</h3>
+          <div class="sub">Share of today's P buyers who must switch to the same-size E product to stay level with selling both lines. Everything else in this scenario stays as set.</div>
+          <div class="be-list" id="dropList"></div>
+          <div class="controls">
+            <span id="dropNow" class="axis-note"></span>
+            <button class="btn primary" id="btnDropScen" type="button">Create a "Drop P" scenario from this one</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>NPV against the share of P buyers who switch</h3>
+          <div class="sub">Where the lines cross is the break-even switching rate</div>
+          <div class="legend"><span><i class="ln" style="background:var(--s1)"></i>P-series off sale</span><span><i class="ln" style="background:var(--muted)"></i>Both lines on sale</span></div>
+          <div class="chart-box"><canvas id="cLines" role="img" aria-label="NPV versus switching rate"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Size by size: E sales needed per lost P sale</h3>
+          <div class="sub">One E sale earns several times the margin of a P sale. Year 1, before any switching.</div>
+          <div class="tbl-wrap"><table id="pairTable"></table></div>
         </div>
       </section>
 
@@ -351,31 +392,47 @@ textarea.csv { width: 100%; height: 140px; font-family: var(--font-mono); font-s
 'use strict';
 
 /* ---------- Defaults ---------- */
-// Unit cost = 60% of net price (list less 25% channel discount) -> 40% gross margin in Base.
-// Split: purchases 60%, in-house labour 28%, overhead 12%. Volume 6,000 pcs/y, peaking in the middle sizes.
+// Two product lines in the same 7 sizes. Unit cost split: purchases 60%, in-house labour 28%, overhead 12%.
+// E-series (premium): unit cost = 60% of net price (list less 25% channel discount) -> 40% gross margin. 6,000 pcs/y.
+// P-series (performance, mid-tier): list price ~70% of E, 15% gross margin. 4,000 pcs/y. Both peak in the middle sizes.
 const DEFAULT_SIZES = [
-  { name: 'E01', vol: 400, price: 2000, mat: 540, lab: 252, log: 108 },
-  { name: 'E02', vol: 750, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
-  { name: 'E04', vol: 1150, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
-  { name: 'E06', vol: 1400, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
-  { name: 'E08', vol: 1150, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
-  { name: 'E10', vol: 750, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
-  { name: 'E14', vol: 400, price: 14000, mat: 3780, lab: 1764, log: 756 },
+  { line: 'E', name: 'E01', vol: 400, price: 2000, mat: 540, lab: 252, log: 108 },
+  { line: 'E', name: 'E02', vol: 750, price: 3100, mat: 837, lab: 390.6, log: 167.4 },
+  { line: 'E', name: 'E04', vol: 1150, price: 5250, mat: 1417.5, lab: 661.5, log: 283.5 },
+  { line: 'E', name: 'E06', vol: 1400, price: 7450, mat: 2011.5, lab: 938.7, log: 402.3 },
+  { line: 'E', name: 'E08', vol: 1150, price: 9650, mat: 2605.5, lab: 1215.9, log: 521.1 },
+  { line: 'E', name: 'E10', vol: 750, price: 11800, mat: 3186, lab: 1486.8, log: 637.2 },
+  { line: 'E', name: 'E14', vol: 400, price: 14000, mat: 3780, lab: 1764, log: 756 },
+  { line: 'P', name: 'P01', vol: 250, price: 1400, mat: 535.5, lab: 249.9, log: 107.1 },
+  { line: 'P', name: 'P02', vol: 500, price: 2150, mat: 822.4, lab: 383.8, log: 164.5 },
+  { line: 'P', name: 'P04', vol: 750, price: 3700, mat: 1415.2, lab: 660.5, log: 283.1 },
+  { line: 'P', name: 'P06', vol: 1000, price: 5200, mat: 1989, lab: 928.2, log: 397.8 },
+  { line: 'P', name: 'P08', vol: 750, price: 6750, mat: 2581.9, lab: 1204.9, log: 516.4 },
+  { line: 'P', name: 'P10', vol: 500, price: 8250, mat: 3155.6, lab: 1472.6, log: 631.1 },
+  { line: 'P', name: 'P14', vol: 250, price: 9800, mat: 3748.5, lab: 1749.3, log: 749.7 },
 ];
+const LINES = { E: 'E-series · premium', P: 'P-series · performance' };
 const BASE_D = {
   volLevel: 0, volGrowth: 6, elasticity: -1.2,
   priceLevel: 0, priceChange: 2, discount: 25,
   matLevel: 0, labLevel: 0, logLevel: 0, matInfl: 3, labInfl: 2.5,
-  staff: 4450, marketing: 1800, rnd: 1750, other: 900, fixedInfl: 2.5,
+  staff: 5200, marketing: 2200, rnd: 1750, other: 900, fixedInfl: 2.5,
   capex: 12000, depYears: 7, nwc: 12, tax: 20, wacc: 10, horizon: 5,
+  pActive: 1, migration: 20, pSaving: 0,
 };
 const PRESETS = [
   { name: 'Base', d: {} },
   { name: 'Pessimistic', d: { volLevel: -15, volGrowth: 2, priceChange: 0, matInfl: 6, labInfl: 4 } },
   { name: 'Optimistic', d: { volLevel: 10, volGrowth: 10, priceLevel: 3, matInfl: 1.5 } },
+  { name: 'Drop P-series', d: { pActive: 0, migration: 20 } },
 ];
 
 const LEVERS = [
+  { group: 'Product lines', items: [
+    { k: 'pActive', label: 'P-series on sale', type: 'toggle' },
+    { k: 'migration', label: 'P buyers switching to E', min: 0, max: 100, step: 1, unit: '%', hint: 'Applies when the P-series is off sale. Each size moves to the same E size.' },
+    { k: 'pSaving', label: 'Fixed cost saved without P', min: 0, max: 3000, step: 50, unit: 'k€' },
+  ]},
   { group: 'Market & volume', items: [
     { k: 'volLevel', label: 'Volume vs. plan', min: -50, max: 50, step: 1, unit: '%' },
     { k: 'volGrowth', label: 'Volume growth', min: -10, max: 30, step: 0.5, unit: '%/y' },
@@ -412,7 +469,7 @@ const LEVERS = [
 const LEVER_BY_KEY = Object.fromEntries(LEVERS.flatMap(g => g.items).map(l => [l.k, l]));
 
 /* ---------- State ---------- */
-const STORE_KEY = 'bcl.v3';
+const STORE_KEY = 'bcl.v4';
 const clone = o => JSON.parse(JSON.stringify(o));
 let uid = 1;
 function makeScenario(name, dOverrides, sizes, colorIdx) {
@@ -420,7 +477,7 @@ function makeScenario(name, dOverrides, sizes, colorIdx) {
 }
 function defaultState() {
   const scenarios = PRESETS.map((p, i) => makeScenario(p.name, p.d, null, i));
-  return { scenarios, activeId: scenarios[0].id, compareIds: scenarios.map(s => s.id), tab: 'model', nextColor: 3 };
+  return { scenarios, activeId: scenarios[0].id, compareIds: scenarios.map(s => s.id), tab: 'model', nextColor: scenarios.length };
 }
 function loadState() {
   try {
@@ -445,11 +502,21 @@ const active = () => state.scenarios.find(s => s.id === state.activeId) || state
 const baseScenario = () => state.scenarios.find(s => s.name === 'Base') || state.scenarios[0];
 
 /* ---------- Model ---------- */
+const lineOf = z => z.line === 'P' ? 'P' : 'E';
 function compute(s) {
   const d = s.d, H = Math.round(d.horizon);
   const elastic = Math.pow(Math.max(0.01, 1 + d.priceLevel / 100), d.elasticity);
   const volF0 = Math.max(0, 1 + d.volLevel / 100) * elastic;
-  const fixed0 = (d.staff + d.marketing + d.rnd + d.other) * 1000;
+  const pOn = !!d.pActive;
+  const fixed0 = (d.staff + d.marketing + d.rnd + d.other - (pOn ? 0 : d.pSaving)) * 1000;
+  // Plan volume per row. With the P-series off sale, P volume is zero and the chosen share
+  // of each P size moves to the E size in the same position.
+  const eRows = s.sizes.filter(z => lineOf(z) === 'E'), pRows = s.sizes.filter(z => lineOf(z) === 'P');
+  const planVol = s.sizes.map(z => {
+    if (lineOf(z) === 'P') return pOn ? z.vol : 0;
+    const j = eRows.indexOf(z), pz = pRows[j];
+    return z.vol + (!pOn && pz ? pz.vol * d.migration / 100 : 0);
+  });
   const capex = d.capex * 1000;
   const dep = d.depYears > 0 ? capex / d.depYears : 0;
   const years = [];
@@ -462,12 +529,14 @@ function compute(s) {
     const lf = (1 + d.labLevel / 100) * Math.pow(1 + d.labInfl / 100, t - 1);
     const of = (1 + d.logLevel / 100) * Math.pow(1 + d.labInfl / 100, t - 1);
     let units = 0, rev = 0, vc = 0;
-    const sz = s.sizes.map(z => {
-      const u = Math.max(0, z.vol * volF0 * g);
+    const lines = { E: { units: 0, rev: 0, gm: 0 }, P: { units: 0, rev: 0, gm: 0 } };
+    const sz = s.sizes.map((z, i) => {
+      const u = Math.max(0, planVol[i] * volF0 * g);
       const np = z.price * pf;
       const uc = z.mat * mf + z.lab * lf + z.log * of;
       units += u; rev += u * np; vc += u * uc;
-      return { name: z.name, u, np, uc, um: np - uc, rev: u * np, gm: u * (np - uc) };
+      const L = lines[lineOf(z)]; L.units += u; L.rev += u * np; L.gm += u * (np - uc);
+      return { name: z.name, line: lineOf(z), u, np, uc, um: np - uc, rev: u * np, gm: u * (np - uc) };
     });
     const gm = rev - vc;
     const fixed = fixed0 * Math.pow(1 + d.fixedInfl / 100, t - 1);
@@ -482,7 +551,7 @@ function compute(s) {
     const fcf = nopat + depT - dNwc + release;
     cum += fcf;
     cashflows.push(fcf);
-    years.push({ t, units, rev, vc, gm, fixed, ebitda, dep: depT, ebit, tax, nopat, dNwc, release, fcf, cum, sz });
+    years.push({ t, units, rev, vc, gm, fixed, ebitda, dep: depT, ebit, tax, nopat, dNwc, release, fcf, cum, sz, lines });
   }
   const r = d.wacc / 100;
   const npv = npvAt(cashflows, r);
@@ -538,6 +607,7 @@ function perturbations(s) {
     { label: 'CAPEX', fn: (c, p) => { c.d.capex *= 1 + p; } },
     { label: 'WACC', fn: (c, p) => { c.d.wacc *= 1 + p; } },
     { label: 'Volume growth', fn: (c, p) => { c.d.volGrowth *= 1 + p; } },
+    ...(s.d.pActive ? [] : [{ label: 'P→E switching', fn: (c, p) => { c.d.migration = Math.min(100, c.d.migration * (1 + p)); } }]),
     { label: 'Channel discount', fn: (c, p) => { c.d.discount = Math.min(99, c.d.discount * (1 + p)); } },
     { label: s.sizes[ti].name + ' list price', fn: (c, p) => { c.sizes[ti].price *= 1 + p; } },
   ];
@@ -578,6 +648,12 @@ function buildLevers() {
   LEVERS.forEach(g => {
     const grp = el('div', { class: 'lv-group' }, el('h3', { text: g.group }));
     g.items.forEach(l => {
+      if (l.type === 'toggle') {
+        const cb = el('input', { type: 'checkbox', id: 'n-' + l.k, role: 'switch' });
+        cb.addEventListener('change', () => setLever(l.k, cb.checked ? 1 : 0));
+        grp.append(el('label', { class: 'lever toggle', for: 'n-' + l.k }, el('span', { text: l.label }), cb, el('span', { class: 'switch', 'aria-hidden': 'true' })));
+        return;
+      }
       const range = el('input', { type: 'range', id: 'r-' + l.k, min: l.min, max: l.max, step: l.step, 'aria-label': l.label });
       const numIn = el('input', { type: 'number', id: 'n-' + l.k, min: l.min, max: l.max, step: l.step, 'aria-label': l.label + ' value' });
       const row = el('div', { class: 'lever' },
@@ -610,8 +686,10 @@ function buildLevers() {
 function setLever(k, v) {
   active().d[k] = v;
   const l = LEVER_BY_KEY[k];
-  $('r-' + k).value = v; $('n-' + k).value = fmtLever(l, v);
+  if (l.type === 'toggle') $('n-' + k).checked = !!v;
+  else { $('r-' + k).value = v; $('n-' + k).value = fmtLever(l, v); }
   markChanged(k);
+  if (k === 'pActive') syncLineState();
   scheduleRender(); save();
 }
 function markChanged(k) {
@@ -620,7 +698,17 @@ function markChanged(k) {
 }
 function syncLevers() {
   const d = active().d;
-  Object.values(LEVER_BY_KEY).forEach(l => { $('r-' + l.k).value = d[l.k]; $('n-' + l.k).value = fmtLever(l, d[l.k]); markChanged(l.k); });
+  Object.values(LEVER_BY_KEY).forEach(l => {
+    if (l.type === 'toggle') $('n-' + l.k).checked = !!d[l.k];
+    else { $('r-' + l.k).value = d[l.k]; $('n-' + l.k).value = fmtLever(l, d[l.k]); }
+    markChanged(l.k);
+  });
+  syncLineState();
+}
+// Migration and saving levers only matter when the P-series is off sale
+function syncLineState() {
+  const off = !active().d.pActive;
+  ['migration', 'pSaving'].forEach(k => { $('r-' + k).closest('.lever').classList.toggle('dim', !off); });
 }
 
 /* ---------- Scenario bar ---------- */
@@ -697,6 +785,12 @@ const MISSIONS = [
     test: (s, r) => { const n = withChange(s, (c) => { c.d.matLevel = lvl(c.d.matLevel, 0.2); }, 0).npv; return { ok: n > 0, now: 'Shocked NPV ' + eur(n) }; } },
   { id: 'm5', title: 'Value creator', desc: 'Reach an IRR of 25% or more.',
     test: (s, r) => ({ ok: r.irr != null && r.irr >= 0.25, now: 'Now ' + (r.irr == null ? 'n/a' : pct(r.irr)) }) },
+  { id: 'm6', title: 'Lean range', desc: 'Take the P-series off sale and end up with a higher NPV than selling both lines.',
+    test: (s, r) => {
+      const both = compute(Object.assign(clone(s), { d: Object.assign(clone(s.d), { pActive: 1 }) })).npv;
+      if (s.d.pActive) return { ok: false, now: 'P-series is still on sale' };
+      return { ok: r.npv > both, now: 'NPV ' + (r.npv - both >= 0 ? '+' : MINUS) + eur(Math.abs(r.npv - both)) + ' vs. both lines' };
+    } },
 ];
 let prevDone = {};
 function renderMissions(s, res) {
@@ -732,6 +826,8 @@ function renderChecks(s, res) {
   if (d.volLevel >= 25 && d.marketing <= baseScenario().d.marketing) out.push(['Volume +' + d.volLevel + '% over plan with no extra marketing.', 'Where do the extra customers come from?']);
   if (d.discount > 40) out.push(['Channel discount ' + d.discount + '%.', 'Check that the channel terms are realistic for this product.']);
   if (d.matInfl < 0 || d.labInfl < 0) out.push(['Costs fall every year.', 'Is there a concrete sourcing or productivity plan behind the falling costs?']);
+  if (!d.pActive && d.migration > 60) out.push([d.migration + '% of P buyers switch to E.', 'E costs about 40% more than P. Would that many customers really trade up instead of going to a competitor?']);
+  if (!d.pActive && d.pSaving > 0 && d.migration > 0) out.push(['Fixed cost saving of ' + eur(d.pSaving * 1000) + ' per year without P.', 'Name the concrete costs that disappear: people, tooling, inventory, sales support.']);
   if (d.wacc < 6) out.push(['Discount rate below 6%.', 'A low WACC makes almost any case look good. Use the company rate.']);
   if (res.years[0].units > 0 && res.beUnits != null && res.beUnits > res.years[0].units) out.push(['Year 1 volume is below break-even.', 'You need ' + num(res.beUnits) + ' pcs to cover fixed costs, the plan has ' + num(res.years[0].units) + '.']);
   const root = $('checks'); root.textContent = '';
@@ -746,7 +842,7 @@ function renderKPIs(s, res) {
     { label: 'IRR', val: res.irr == null ? 'n/a' : pct(res.irr), st: res.irr == null ? 'crit' : res.irr >= d.wacc / 100 + 0.1 ? 'good' : res.irr >= d.wacc / 100 ? 'warn' : 'crit', sub: [null, 'Hurdle ' + d.wacc + '%'] },
     { label: 'Payback', val: res.payback == null ? '> ' + H + ' y' : res.payback.toFixed(1) + ' y', st: res.payback == null ? 'crit' : res.payback <= 3 ? 'good' : 'warn', sub: [null, 'Investment ' + eur(res.capex)] },
     { label: 'EBIT margin, year ' + Math.min(3, H), val: pct(res.ebitPct3), st: res.ebitPct3 >= 0.15 ? 'good' : res.ebitPct3 > 0 ? 'warn' : 'crit', sub: [null, 'Target 15%'] },
-    { label: 'Revenue, year 1', val: eur(y1.rev), st: '', sub: [null, num(y1.units) + ' pcs · GM ' + pct(res.gmPct1)] },
+    { label: 'Revenue, year 1', val: eur(y1.rev), st: '', sub: [null, 'E ' + num(y1.lines.E.units) + ' · P ' + (d.pActive ? num(y1.lines.P.units) : 'off') + ' pcs · GM ' + pct(res.gmPct1)] },
     { label: 'Break-even volume, year 1', val: res.beUnits == null ? 'n/a' : num(res.beUnits) + ' pcs', st: res.beUnits == null ? 'crit' : res.beUnits <= y1.units * 0.8 ? 'good' : res.beUnits <= y1.units ? 'warn' : 'crit',
       sub: [null, res.beUnits == null ? 'No positive margin' : pct(res.beUnits / Math.max(1, y1.units), 0) + ' of planned volume'] },
   ];
@@ -833,19 +929,24 @@ function buildSizeTable() {
   const s = active(), t = $('sizeTable'); t.textContent = '';
   const hr = el('tr', null, el('th', { text: 'Size' }));
   SIZE_FIELDS.forEach(f => hr.append(el('th', { text: f[1] })));
-  ['Net price', 'Unit cost', 'Unit margin', 'Margin %', 'Revenue share', 'Gross margin'].forEach(h => hr.append(el('th', { text: h })));
+  ['Units Y1', 'Net price', 'Unit cost', 'Unit margin', 'Margin %', 'Revenue share', 'Gross margin'].forEach(h => hr.append(el('th', { text: h })));
   t.append(el('thead', null, hr));
   const tb = el('tbody', { id: 'sizeBody' });
+  let lastLine = null;
   s.sizes.forEach((z, i) => {
+    if (lineOf(z) !== lastLine) {
+      lastLine = lineOf(z);
+      tb.append(el('tr', { class: 'line-head', 'data-line': lastLine }, el('td', { colspan: '13', text: LINES[lastLine] })));
+    }
     const nameIn = el('input', { class: 'cell-in cell-name', id: 'sz-' + i + '-name', value: z.name, 'aria-label': 'Size name', maxlength: '8' });
     nameIn.addEventListener('change', () => { z.name = nameIn.value.trim().slice(0, 8) || z.name; buildShiftSelects(); scheduleRender(); save(); });
-    const tr = el('tr', null, el('td', null, nameIn));
+    const tr = el('tr', { 'data-i': i, 'data-line': lineOf(z) }, el('td', null, nameIn));
     SIZE_FIELDS.forEach(([k, lab, step]) => {
       const inp = el('input', { class: 'cell-in', type: 'number', id: 'sz-' + i + '-' + k, min: '0', step: String(step), value: String(z[k]), 'aria-label': z.name + ' ' + lab });
       inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (isFinite(v) && v >= 0) { z[k] = v; scheduleRender(); save(); } });
       tr.append(el('td', null, inp));
     });
-    for (let j = 0; j < 6; j++) tr.append(el('td', { 'data-c': j }));
+    for (let j = 0; j < 7; j++) tr.append(el('td', { 'data-c': j }));
     tb.append(tr);
   });
   tb.append(el('tr', { class: 'total', id: 'sizeTotal' }));
@@ -853,23 +954,34 @@ function buildSizeTable() {
 }
 function renderMix(s, res) {
   const y1 = res.years[0];
-  const rows = $('sizeBody').querySelectorAll('tr:not(.total)');
+  const rows = $('sizeBody').querySelectorAll('tr[data-i]');
   y1.sz.forEach((z, i) => {
-    const cells = rows[i].querySelectorAll('td[data-c]');
-    const vals = [eur2(z.np), eur2(z.uc), eur2(z.um), pct(z.np ? z.um / z.np : 0), pct(y1.rev ? z.rev / y1.rev : 0), eur(z.gm, false)];
-    cells.forEach((c, j) => { c.textContent = vals[j]; c.className = (j === 2 || j === 3 || j === 5) && z.um < 0 ? 'neg' : ''; });
-    if (z.um < 0) cells[2].textContent = vals[2] + ' ▼';
+    const row = rows[i]; if (!row) return;
+    row.classList.toggle('off', z.line === 'P' && !s.d.pActive);
+    const cells = row.querySelectorAll('td[data-c]');
+    const vals = [num(z.u), eur2(z.np), eur2(z.uc), eur2(z.um), pct(z.np ? z.um / z.np : 0), pct(y1.rev ? z.rev / y1.rev : 0), eur(z.gm, false)];
+    cells.forEach((c, j) => { c.textContent = vals[j]; c.className = (j === 3 || j === 4 || j === 6) && z.um < 0 ? 'neg' : ''; });
+    if (z.um < 0) cells[3].textContent = vals[3] + ' ▼';
   });
+  $('sizeBody').querySelectorAll('tr.line-head').forEach(r => { r.firstChild.textContent = LINES[r.dataset.line] + (r.dataset.line === 'P' && !s.d.pActive ? ' · off sale' : ''); });
   const tot = $('sizeTotal'); tot.textContent = '';
-  tot.append(el('td', { text: 'Total' }), el('td', { text: num(y1.units) }));
-  for (let j = 0; j < 4; j++) tot.append(el('td'));
-  tot.append(el('td', { text: y1.units ? eur2(y1.rev / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.vc / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.gm / y1.units) : '' }), el('td', { text: pct(res.gmPct1) }), el('td', { text: '100%' }), el('td', { text: eur(y1.gm, false) }));
+  tot.append(el('td', { text: 'Total' }));
+  for (let j = 0; j < 5; j++) tot.append(el('td'));
+  tot.append(el('td', { text: num(y1.units) }), el('td', { text: y1.units ? eur2(y1.rev / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.vc / y1.units) : '' }), el('td', { text: y1.units ? eur2(y1.gm / y1.units) : '' }), el('td', { text: pct(res.gmPct1) }), el('td', { text: '100%' }), el('td', { text: eur(y1.gm, false) }));
 
   const o1 = baseOpts();
   o1.interaction = { mode: 'nearest', intersect: true };
   o1.plugins.tooltip.callbacks = { label: c => ' ' + eur2(c.parsed.y) + ' per piece' };
   o1.scales.y.ticks.callback = v => '€' + v;
-  drawChart('cUnit', { type: 'bar', data: { labels: y1.sz.map(z => z.name), datasets: [{ label: 'Unit margin', data: y1.sz.map(z => z.um), backgroundColor: y1.sz.map(z => z.um < 0 ? css('--crit') : css('--s1')), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 44 }] }, options: o1 });
+  o1.interaction = { mode: 'index', intersect: false };
+  o1.plugins.tooltip.callbacks = { label: c => ' ' + eur2(c.parsed.y) + '  ' + c.dataset.label };
+  const eS = y1.sz.filter(z => z.line === 'E'), pS = y1.sz.filter(z => z.line === 'P');
+  const n = Math.max(eS.length, pS.length);
+  const sizeLabel = i => ((eS[i] || pS[i]).name).replace(/^[A-Za-z]+/, '');
+  const ds = [{ label: 'E-series', rows: eS, color: css('--s1') }, { label: 'P-series', rows: pS, color: css('--s2') }]
+    .filter(x => x.rows.length && (x.label === 'E-series' || s.d.pActive))
+    .map(x => ({ label: x.label, data: Array.from({ length: n }, (_, i) => x.rows[i] ? x.rows[i].um : null), backgroundColor: Array.from({ length: n }, (_, i) => x.rows[i] && x.rows[i].um < 0 ? css('--crit') : x.color), borderRadius: 4, borderSkipped: 'start', maxBarThickness: 28, borderColor: css('--surface'), borderWidth: { left: 1, right: 1 } }));
+  drawChart('cUnit', { type: 'bar', data: { labels: Array.from({ length: n }, (_, i) => sizeLabel(i)), datasets: ds }, options: o1 });
 
   const maxGm = Math.max(1, ...y1.sz.map(z => Math.abs(z.gm)));
   const o2 = baseOpts();
@@ -880,15 +992,19 @@ function renderMix(s, res) {
   o2.scales.y.title = { display: true, text: 'Margin %', color: css('--muted') };
   o2.layout = { padding: { top: 16, right: 24 } };
   o2.plugins.tooltip.callbacks = { title: c => c[0].raw.name, label: c => [' ' + num(c.raw.x) + ' pcs', ' ' + c.raw.y.toFixed(1) + '% margin', ' ' + eur(c.raw.gm) + ' gross margin'] };
-  drawChart('cBubble', { type: 'bubble', data: { datasets: [{ label: 'Sizes', data: y1.sz.map(z => ({ x: z.u, y: z.np ? z.um / z.np * 100 : 0, r: 5 + 22 * Math.sqrt(Math.max(0, z.gm) / maxGm), name: z.name, gm: z.gm })),
-    backgroundColor: y1.sz.map(z => z.um < 0 ? css('--crit') + 'b0' : css('--s1') + '99'), borderColor: css('--surface'), borderWidth: 2, hoverBorderColor: css('--ink') }] },
+  const bub = (line, color) => {
+    const rows = y1.sz.filter(z => z.line === line && z.u > 0);
+    return { label: line + '-series', data: rows.map(z => ({ x: z.u, y: z.np ? z.um / z.np * 100 : 0, r: 5 + 22 * Math.sqrt(Math.max(0, z.gm) / maxGm), name: z.name, gm: z.gm })),
+      backgroundColor: rows.map(z => z.um < 0 ? css('--crit') + 'b0' : color + '99'), borderColor: css('--surface'), borderWidth: 2, hoverBorderColor: css('--ink') };
+  };
+  drawChart('cBubble', { type: 'bubble', data: { datasets: [bub('E', css('--s1')), bub('P', css('--s2'))] },
     options: o2, plugins: [bubbleLabels] });
   renderShiftPreview();
 }
 const bubbleLabels = { id: 'bubbleLabels', afterDatasetsDraw(chart) {
-  const ctx = chart.ctx, meta = chart.getDatasetMeta(0);
+  const ctx = chart.ctx;
   ctx.save(); ctx.font = '600 11px "IBM Plex Sans", system-ui, sans-serif'; ctx.fillStyle = css('--ink'); ctx.textAlign = 'center';
-  meta.data.forEach((p, i) => { const d = chart.data.datasets[0].data[i]; ctx.fillText(d.name, p.x, p.y - (p.options.radius || 6) - 4); });
+  chart.data.datasets.forEach((ds, di) => chart.getDatasetMeta(di).data.forEach((p, i) => { ctx.fillText(ds.data[i].name, p.x, p.y - (p.options.radius || 6) - 4); }));
   ctx.restore();
 } };
 
@@ -924,6 +1040,90 @@ $('shiftApply').addEventListener('click', () => {
   buildSizeTable(); renderAll(); save();
 });
 
+/* ---------- Product lines tab ---------- */
+const withD = (s, patch) => Object.assign(clone(s), { d: Object.assign(clone(s.d), patch) });
+function renderLines(s, res) {
+  const keep = compute(withD(s, { pActive: 1 }));
+  const drop = m => compute(withD(s, { pActive: 0, migration: m }));
+  const k1 = keep.years[0], pUnits = k1.lines.P.units, eUnits = k1.lines.E.units;
+
+  // Line summary
+  const t = $('lineTable'); t.textContent = '';
+  const hr = el('tr'); ['Line', 'Volume', 'Revenue', 'Gross margin', 'Margin %', 'Share of volume', 'Share of gross margin', 'Margin per piece'].forEach(h => hr.append(el('th', { text: h })));
+  t.append(el('thead', null, hr));
+  const tb = el('tbody'), y1 = res.years[0];
+  [['E', LINES.E], ['P', LINES.P + (s.d.pActive ? '' : ' · off sale')]].forEach(([k, lab]) => {
+    const L = y1.lines[k];
+    tb.append(el('tr', L.units ? null : { class: 'off' }, el('td', { text: lab }), el('td', { text: num(L.units) + ' pcs' }), el('td', { text: eur(L.rev, false) }), el('td', { text: eur(L.gm, false) }),
+      el('td', { text: pct(L.rev ? L.gm / L.rev : 0) }), el('td', { text: pct(y1.units ? L.units / y1.units : 0) }), el('td', { text: pct(y1.gm ? L.gm / y1.gm : 0) }), el('td', { text: L.units ? eur2(L.gm / L.units) : '–' })));
+  });
+  tb.append(el('tr', { class: 'total' }, el('td', { text: 'Total' }), el('td', { text: num(y1.units) + ' pcs' }), el('td', { text: eur(y1.rev, false) }), el('td', { text: eur(y1.gm, false) }),
+    el('td', { text: pct(res.gmPct1) }), el('td', { text: '100%' }), el('td', { text: '100%' }), el('td', { text: y1.units ? eur2(y1.gm / y1.units) : '–' })));
+  t.append(tb);
+
+  // Break-even switching rates
+  const targets = [
+    ['Gross margin, year 1', r => r.years[0].gm],
+    ['EBIT, year 1', r => r.years[0].ebit],
+    ['NPV', r => r.npv],
+  ];
+  const dl = $('dropList'); dl.textContent = '';
+  let npvNeed = null;
+  targets.forEach(([lab, f]) => {
+    const goal = f(keep), g = m => f(drop(m)) - goal;
+    let v, sub;
+    if (!pUnits) { v = '–'; sub = 'No P-series volume to replace'; }
+    else if (g(0) >= 0) { v = '0%'; sub = 'Dropping P pays off even if no buyer switches'; if (lab === 'NPV') npvNeed = 0; }
+    else if (g(1000) < 0) { v = 'Not reachable'; sub = 'E margins cannot replace the P margin'; }
+    else {
+      let a = 0, b = 1000;
+      for (let i = 0; i < 40; i++) { const m = (a + b) / 2; if (g(m) >= 0) b = m; else a = m; }
+      const need = b; if (lab === 'NPV') npvNeed = need;
+      const extra = pUnits * need / 100;
+      v = need.toFixed(1) + '%';
+      sub = '= +' + num(extra) + ' E pcs per year (+' + pct(eUnits ? extra / eUnits : 0) + ' E volume)';
+    }
+    dl.append(el('div', { class: 'be' }, el('div', { class: 'be-k', text: 'Keep ' + lab }), el('div', { class: 'be-v', text: v }), el('div', { class: 'be-s', text: sub })));
+  });
+  const atNow = drop(s.d.migration);
+  const dn = atNow.npv - keep.npv;
+  $('dropNow').textContent = 'At ' + s.d.migration + '% switching (lever on the left), dropping P changes NPV by ' + (dn >= 0 ? '+' : MINUS) + eur(Math.abs(dn)) + '.';
+
+  // NPV curve
+  const maxM = Math.min(300, Math.max(100, npvNeed != null ? Math.ceil(npvNeed * 1.4 / 10) * 10 : 100));
+  const xs = []; for (let m = 0; m <= maxM; m += maxM / 20) xs.push(Math.round(m));
+  const o = baseOpts();
+  o.scales.x.title = { display: true, text: 'P buyers switching to E', color: css('--muted') };
+  o.plugins.tooltip.callbacks = { title: c => c[0].label + ' switching', label: c => ' ' + eur(c.parsed.y) + '  ' + c.dataset.label };
+  drawChart('cLines', { type: 'line', data: { labels: xs.map(m => m + '%'), datasets: [
+    { label: 'P-series off sale', data: xs.map(m => drop(m).npv), borderColor: css('--s1'), backgroundColor: css('--s1'), borderWidth: 2, pointRadius: xs.map(m => Math.abs(m - s.d.migration) < maxM / 40 ? 5 : 0), pointHoverRadius: 5, tension: 0 },
+    { label: 'Both lines on sale', data: xs.map(() => keep.npv), borderColor: css('--muted'), backgroundColor: css('--muted'), borderWidth: 2, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4 },
+  ] }, options: o, plugins: [zeroLine] });
+
+  // Size pairs
+  const pt = $('pairTable'); pt.textContent = '';
+  const ph = el('tr'); ['Size', 'P volume', 'P margin / pc', 'E margin / pc', 'E sales to replace 1 P sale', 'E pcs to replace all P'].forEach(h => ph.append(el('th', { text: h })));
+  pt.append(el('thead', null, ph));
+  const pb = el('tbody');
+  const eS = k1.sz.filter(z => z.line === 'E'), pS = k1.sz.filter(z => z.line === 'P');
+  let totNeed = 0;
+  pS.forEach((pz, i) => {
+    const ez = eS[i]; if (!ez) return;
+    const ratio = ez.um > 0 ? pz.um / ez.um : null;
+    const need = ratio != null ? pz.u * ratio : null; if (need != null) totNeed += need;
+    pb.append(el('tr', null, el('td', { text: ez.name + ' / ' + pz.name }), el('td', { text: num(pz.u) + ' pcs' }), el('td', { text: eur2(pz.um) }), el('td', { text: eur2(ez.um) }),
+      el('td', { text: ratio == null ? '–' : ratio.toFixed(2) }), el('td', { text: need == null ? '–' : num(need) + ' pcs' })));
+  });
+  pb.append(el('tr', { class: 'total' }, el('td', { text: 'Total' }), el('td', { text: num(pUnits) + ' pcs' }), el('td'), el('td'),
+    el('td', { text: pUnits ? (totNeed / pUnits).toFixed(2) : '–' }), el('td', { text: num(totNeed) + ' pcs' })));
+  pt.append(pb);
+}
+$('btnDropScen').addEventListener('click', () => {
+  const a = active();
+  addScenario(makeScenario((a.name + ' · drop P').slice(0, 40), Object.assign(clone(a.d), { pActive: 0 }), a.sizes, state.nextColor++ % 8));
+  buildSizeTable(); buildShiftSelects();
+});
+
 /* ---------- Compare tab ---------- */
 function renderCompare() {
   const chips = $('cmpChips'); chips.textContent = '';
@@ -946,6 +1146,8 @@ function renderCompare() {
     ['NPV', x => x.r.npv, eur, 1],
     ['IRR', x => x.r.irr, v => v == null ? 'n/a' : pct(v), 1, 'pp'],
     ['Payback', x => x.r.payback, v => v == null ? 'never' : v.toFixed(1) + ' y', -1, 'y'],
+    ['E-series volume Y1', x => x.r.years[0].lines.E.units, v => num(v) + ' pcs', 1, 'pcs'],
+    ['P-series volume Y1', x => x.r.years[0].lines.P.units, v => num(v) + ' pcs', 0, 'pcs'],
     ['Revenue Y1', x => x.r.years[0].rev, eur, 1],
     ['Revenue final year', x => x.r.years[x.r.years.length - 1].rev, eur, 1],
     ['Gross margin % Y1', x => x.r.gmPct1, v => pct(v), 1, 'pp'],
@@ -969,15 +1171,16 @@ function renderCompare() {
         const v = get(x), td = el('td', { text: fmt(v) });
         if (i > 0 && v != null && ref != null) {
           const diff = v - ref;
-          if (Math.abs(diff) > 1e-9) {
+          if (Math.abs(diff) > 0.5 || (kind !== 'pcs' && Math.abs(diff) > 1e-9)) {
             const good = diff * better > 0;
             let txt;
             if (kind === 'pp') txt = signed(diff * 100) + ' pp';
             else if (kind === 'y') txt = signed(diff) + ' y';
             else if (kind === 'n') txt = signed(diff, 0);
-            else if (lab.startsWith('Break-even')) txt = signed(diff, 0) + ' pcs';
+            else if (kind === 'pcs' || lab.startsWith('Break-even')) txt = (diff > 0 ? '+' : MINUS) + num(Math.abs(diff)) + ' pcs';
             else txt = (diff > 0 ? '+' : MINUS) + eur(Math.abs(diff));
-            td.append(el('span', { class: 'delta ' + (good ? 'up' : 'down'), text: (good ? '▲ ' : '▼ ') + txt }));
+            if (!better) td.append(el('span', { class: 'delta', text: txt }));
+            else td.append(el('span', { class: 'delta ' + (good ? 'up' : 'down'), text: (good ? '▲ ' : '▼ ') + txt }));
           }
         }
         tr.append(td);
@@ -1018,7 +1221,7 @@ $('btnCsv').addEventListener('click', () => {
   const q = v => '"' + String(v).replace(/"/g, '""') + '"';
   compareResults.forEach(x => {
     const ys = x.r.years;
-    [['Volume pcs', y => Math.round(y.units)], ['Revenue', y => Math.round(y.rev)], ['Gross margin', y => Math.round(y.gm)], ['EBITDA', y => Math.round(y.ebitda)], ['EBIT', y => Math.round(y.ebit)], ['Free cash flow', y => Math.round(y.fcf)]]
+    [['Volume pcs', y => Math.round(y.units)], ['E-series pcs', y => Math.round(y.lines.E.units)], ['P-series pcs', y => Math.round(y.lines.P.units)], ['Revenue', y => Math.round(y.rev)], ['Gross margin', y => Math.round(y.gm)], ['EBITDA', y => Math.round(y.ebitda)], ['EBIT', y => Math.round(y.ebit)], ['Free cash flow', y => Math.round(y.fcf)]]
       .forEach(([m, f]) => lines.push([q(x.s.name), q(m), m === 'Free cash flow' ? -Math.round(x.r.capex) : '', ...ys.map(f)].join(',')));
     lines.push([q(x.s.name), q('NPV'), Math.round(x.r.npv)].join(','));
     lines.push([q(x.s.name), q('IRR %'), x.r.irr == null ? '' : (x.r.irr * 100).toFixed(1)].join(','));
@@ -1124,7 +1327,7 @@ function mix(a, b, k) { return a.map((v, i) => Math.round(v + (b[i] - v) * k)); 
 ['sensSwing', 'sensMetric'].forEach(id => $(id).addEventListener('change', () => renderAll()));
 
 /* ---------- Tabs ---------- */
-const TABS = ['model', 'mix', 'compare', 'sens'];
+const TABS = ['model', 'mix', 'lines', 'compare', 'sens'];
 function setTab(tab) {
   state.tab = tab; save();
   TABS.forEach(t => { $('p-' + t).hidden = t !== tab; $('t-' + t).setAttribute('aria-selected', String(t === tab)); });
@@ -1143,6 +1346,7 @@ function renderAll() {
   renderChecks(s, res);
   if (state.tab === 'model') renderModel(s, res);
   else if (state.tab === 'mix') renderMix(s, res);
+  else if (state.tab === 'lines') renderLines(s, res);
   else if (state.tab === 'compare') renderCompare();
   else if (state.tab === 'sens') renderSens(s, res);
 }
