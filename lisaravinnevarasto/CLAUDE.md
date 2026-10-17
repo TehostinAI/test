@@ -216,6 +216,10 @@ Jos `icon.svg` muuttuu, luo PNG:t uudelleen.
 3. iPhone ensin: sovelluksen asetukset → liitä avain → tiedot lähtevät repoon.
 4. iPad: lisää sovellus kotinäytölle → liitä sama avain → vahvista tietojen haku.
 
+Otettu käyttöön 17.10.2026 iPhonella ja iPadilla. Käyttäjän avain ei vanhene
+("never expire", käyttäjän tietoinen valinta). Jos avain vuotaa, se poistetaan GitHubista
+(Settings → Developer settings → Fine-grained tokens) ja tehdään uusi.
+
 ## Tunnetut riskit
 
 Käyttäjällä on iPhone ja iPad, joten testaa ja ohjeista ensisijaisesti Safarille.

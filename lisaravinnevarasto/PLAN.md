@@ -49,6 +49,7 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 - Valmis kun: testit menevät läpi
 - Huom: GET:n CORS todennettu (Access-Control-Allow-Origin: *). PUT:n preflightia ei
   voitu todentaa pilviympäristön välityspalvelimen takia → varmistetaan vaiheessa 10.
+  → Varmistettu 17.10.2026: synkronointi toimii oikealla iPhonella ja iPadilla.
 
 ## [x] Vaihe 8: Synkronoinnin kulku
 - `sync.js`: CLAUDE.md:n kulku kohdat 1–7, ensimmäinen kytkentä, uudelleenyritykset
@@ -56,14 +57,14 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 - Testit korvatulla GitHubilla: kaksi "laitetta" samaa etärepoa vasten
 - Valmis kun: testit menevät läpi, mukaan lukien ristiriita- ja offline-tapaukset
 
-## [ ] Vaihe 9: Käyttöliittymä
+## [x] Vaihe 9: Käyttöliittymä
 - Asetukset: avaimen liittäminen ja poisto, yhteyden testaus
 - Tilarivi: synkronoitu / odottaa verkkoa / avain ei kelpaa
 - Ristiriitailmoitus tuotteen nimellä, ensimmäisen kytkennän vahvistus
 - Selaintesti, jossa GitHubin rajapinta on korvattu
 - Valmis kun: selaintesti menee läpi ja kuvakaappaukset on tarkistettu
 
-## [ ] Vaihe 10: Käyttöönotto
+## [x] Vaihe 10: Käyttöönotto
 - Käyttäjä luo yksityisen repon ja avaimen (CLAUDE.md:n ohje)
 - iPhone ensin, sitten iPad
 - Valmis kun: VISION.md:n onnistumisehto toteutuu molempiin suuntiin
