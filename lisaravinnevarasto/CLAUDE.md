@@ -125,8 +125,9 @@ Jos `icon.svg` muuttuu, luo PNG:t uudelleen.
 
 ## Julkaisu
 
-- GitHub Pages: repo `TehostinAI/test` → Settings → Pages → Deploy from branch,
-  kansio `/ (root)`.
+- GitHub Pages: repo `TehostinAI/test` → Settings → Pages → Deploy from branch
+  `claude/lisaravinnevarasto`, kansio `/ (root)`. Otettu käyttöön 17.10.2026.
+- Julkaisun tilan voi tarkistaa GitHub Actionsin ajosta "pages build and deployment".
 - Osoite: `https://tehostinai.github.io/test/lisaravinnevarasto/`
 - Julkaisu tapahtuu pushaamalla. Muutos näkyy noin minuutin päästä.
 
@@ -139,3 +140,5 @@ Käyttäjällä on iPhone, joten testaa ja ohjeista ensisijaisesti Safarille.
   ohjeistetaan lisäämään sovellus kotinäytölle. Lisäksi kutsutaan
   `navigator.storage.persist()`.
 - Selaimen tietojen tyhjennys poistaa varaston. Visio hyväksyy tämän.
+- iPhonessa kotinäytön sovelluksella ja Safarin välilehdellä on erilliset
+  localStoraget. Käyttäjä käyttää vain kotinäytön sovellusta.

@@ -22,11 +22,11 @@ Merkitse vaihe valmiiksi `[x]`, kun käyttäjä on hyväksynyt sen.
 - Valmis kun: sovellus toimii paikallisesti selaimessa ja näyttää samalta
   kuin prototyyppi (kuvakaappaus)
 
-## [ ] Vaihe 4: Kotinäyttö
+## [x] Vaihe 4: Kotinäyttö
 - `manifest.webmanifest`, kuvakkeet, iPhonen meta-tagit
 - Valmis kun: tiedostot ovat paikallaan ja sivu latautuu ilman virheitä
 
-## [ ] Vaihe 5: Julkaisu
+## [x] Vaihe 5: Julkaisu
 - Käyttäjä laittaa GitHub Pagesin päälle
 - Käyttäjä avaa osoitteen iPhonella ja lisää sen kotinäytölle
 - Valmis kun: VISION.md:n "Onnistuminen" toteutuu
