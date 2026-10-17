@@ -37,7 +37,7 @@ Merkitse vaihe valmiiksi `[x]`, kun käyttäjä on hyväksynyt sen.
 
 Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi".
 
-## [ ] Vaihe 6: Yhdistäminen
+## [x] Vaihe 6: Yhdistäminen
 - `merge.js`: `merge(base, local, remote)` → `{ state, conflicts }`
 - Testit: jokainen CLAUDE.md:n yhdistämissääntö omana testinään
 - Valmis kun: testit menevät läpi
@@ -47,6 +47,8 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
   (ei verkkoa, avain ei kelpaa, ristiriita 409, tiedostoa ei ole)
 - Testit korvatulla `fetch`illä, ääkköset mukana
 - Valmis kun: testit menevät läpi
+- Huom: GET:n CORS todennettu (Access-Control-Allow-Origin: *). PUT:n preflightia ei
+  voitu todentaa pilviympäristön välityspalvelimen takia → varmistetaan vaiheessa 10.
 
 ## [ ] Vaihe 8: Synkronoinnin kulku
 - `sync.js`: CLAUDE.md:n kulku kohdat 1–7, ensimmäinen kytkentä, uudelleenyritykset
