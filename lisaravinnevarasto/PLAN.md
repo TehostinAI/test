@@ -11,7 +11,7 @@ Merkitse vaihe valmiiksi `[x]`, kun käyttäjä on hyväksynyt sen.
 
 ## [ ] Vaihe 2: Tallennus ja lähtödata
 - `seed.js`: prototyypin 10 tuotetta
-- Lataus/tallennus localStorageen CLAUDE.md:n sääntöjen mukaan
+- `storage.js`: lataus/tallennus localStorageen CLAUDE.md:n sääntöjen mukaan
   (seed vain kun avainta ei ole, try/catch, `navigator.storage.persist()`)
 - Testit lataussäännöille (localStorage korvataan testissä)
 - Valmis kun: testit menevät läpi

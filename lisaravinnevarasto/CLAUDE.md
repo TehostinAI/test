@@ -12,7 +12,7 @@ puhelimen kotinäytölle.
 ```
 Puhelin
  └─ Selain / kotinäytön kuvake
-     ├─ index.html + style.css + app.js + logic.js + seed.js   ← GitHub Pages
+     ├─ index.html, style.css, app.js, logic.js, storage.js, seed.js  ← GitHub Pages
      └─ localStorage: "lisaravinnevarasto.v1"                  ← kaikki data
 ```
 
@@ -26,6 +26,7 @@ Puhelin
 | GitHub Pages | Repo on julkinen, joten Pages on ilmainen. Ei uutta palvelua tai tunnusta. | Netlify, Cloudflare Pages (toimisivat, mutta vaativat uuden tilin) |
 | Lähtödata koodissa (`seed.js`) | Käyttäjän päätös: julkisuus on ok. | Tuontilinkki, käsin syöttö |
 | Laskentalogiikka omassa tiedostossa (`logic.js`) | Puhtaat funktiot voi testata ilman selainta. Laskenta on sovelluksen tärkein osa. | Kaikki yhdessä tiedostossa kuten prototyypissä |
+| Tallennus omassa tiedostossa (`storage.js`), localStorage annetaan parametrina | Lataussäännöt (seed, rikkinäinen data, estetty tallennus) voi testata ilman selainta. Lisätty vaiheessa 2. | Tallennus `app.js`:ssä (ei testattavissa) |
 | Ei service workeria | Visio ei vaadi offline-käyttöä. Service worker tuo välimuistiongelmia ("miksi päivitys ei näy?"). | Täysi PWA |
 | Ulkoasu kopioidaan prototyypistä | Visio: näyttää samalta kuin nyt. | Uusi design |
 
@@ -38,11 +39,12 @@ lisaravinnevarasto/
 ├─ index.html           sivun runko, lataa muut tiedostot
 ├─ style.css            ulkoasu (prototyypin CSS)
 ├─ logic.js             puhtaat funktiot: päivämäärät, saldo, tila, ostoslista
-├─ app.js               käyttöliittymä: renderöinti, dialogit, tallennus
+├─ storage.js           lataus ja tallennus localStorageen
+├─ app.js               käyttöliittymä: renderöinti, dialogit
 ├─ seed.js              prototyypin 10 tuotetta lähtödatana
 ├─ manifest.webmanifest kotinäytön nimi, väri ja kuvake
 ├─ icon-192.png, icon-512.png, apple-touch-icon.png
-└─ test/logic.test.js   logic.js:n testit
+└─ test/               logic.test.js, storage.test.js
 ```
 
 Kaikki JS-tiedostot ovat ES-moduuleja (`<script type="module">`, `import`/`export`).
@@ -84,6 +86,10 @@ localStorage-avain `lisaravinnevarasto.v1`, arvo JSON:
 - Jos avainta `lisaravinnevarasto.v1` ei ole, tallennetaan `seed.js`:n data.
 - Jos avain on olemassa (myös tyhjällä listalla), seediä EI käytetä. Muuten
   käyttäjän poistamat tuotteet palaisivat.
+- Jos tallennettu data on rikki, se kopioidaan avaimeen
+  `lisaravinnevarasto.v1.rikki-YYYY-MM-DD` ja aloitetaan tyhjästä listasta.
+- Jos localStorage ei toimi, sovellus näyttää lähtödatan, mutta muutokset
+  eivät tallennu. Käyttöliittymä kertoo tästä selvästi.
 
 ## Säännöt
 
@@ -91,7 +97,7 @@ localStorage-avain `lisaravinnevarasto.v1`, arvo JSON:
   resurssi on Google Fonts, kuten prototyypissä.
 - Kaikki käyttöliittymän tekstit suomeksi.
 - Käyttäjän syöte escapetaan aina ennen HTML:ään lisäämistä (`esc()`).
-- Muutos `logic.js`:ään → lisää tai päivitä testi.
+- Muutos `logic.js`:ään tai `storage.js`:ään → lisää tai päivitä testi.
 - Älä lisää ominaisuuksia, joita VISION.md ei mainitse. Ehdota ne käyttäjälle.
 - Jos tietomalli muuttuu, nosta versiota (`v2`) ja kirjoita siirto vanhasta.
 - Selaimen tallennus voi epäonnistua (yksityinen selaus). Kääri
