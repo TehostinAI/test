@@ -24,6 +24,10 @@ poikkeukset: uuden purkin tai purkista lasketun todellisen määrän.
    - Ostoslista ilmestyy, kun jokin tuote alittaa tilausrajansa (esim. 14 pv).
    - Listaa täydennetään seuraavaksi loppuvilla tuotteilla järjestyksessä,
      kunnes tilauksen arvo on vähintään rahtivapaan raja (89 € noutopisteeseen).
+   - Jokaista listan tuotetta tilataan niin monta purkkia, että se riittää
+     60 päivää. Kulutustahti ja pakkauskoko ratkaisevat määrän: nopeasti
+     kuluvia pieniä pakkauksia tilataan useampi. Purkkimäärä vaikuttaa
+     tilauksen arvoon.
    - Näen tilauksen arvon ja paljonko rajaan puuttuu, ja voin kopioida listan.
    - Tavoitteena on tilata ajoissa, mutta aina rahtivapaasti.
 7. Lista järjestetty niin, että ensimmäisenä loppuva on ylimpänä
