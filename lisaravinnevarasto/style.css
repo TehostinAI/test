@@ -228,3 +228,17 @@ input[type="number"]{font-family:"IBM Plex Mono",ui-monospace,monospace;font-var
   background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:99px;
   font-size:.8125rem;box-shadow:var(--shadow);z-index:50;
 }
+
+/* ---- synkronointi ---- */
+.sync{
+  border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:14px;display:flex;flex-direction:column;gap:10px;
+}
+.sync h2{
+  margin:0;font-family:"Archivo",sans-serif;font-size:.8125rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);
+}
+.sync p{margin:0;font-size:.875rem;color:var(--ink-2)}
+.alert ul{margin:6px 0 10px;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.alert b{font-weight:600}
+.err{font-size:.8125rem;color:var(--crit);margin:0}

@@ -146,8 +146,12 @@ Ensimmäinen kytkentä laitteella (ei `sha`:ta):
 - Etätiedosto on olemassa → kysytään vahvistus: "Pilvessä on N tuotetta
   (päivitetty X). Korvataanko tämän laitteen tiedot?" Ei = ei kytketä.
 
+Muokkaus synkronoinnin aikana: synkronoinnille annetaan kopio tilasta. Jos
+käyttäjä muutti tietoja sillä välin, `applyResult(kopio, nykyinen, tulos)`
+yhdistää muutokset tulokseen (`merge`), ja uusi synkronointi ajastetaan.
+
 Virheet:
-- Ei verkkoa → `dirty` säilyy, yritetään seuraavalla kerralla.
+- Ei verkkoa → `dirty` säilyy, yritetään seuraavalla kerralla (`online`, `visibilitychange`).
 - 401/403/404 repoon → "Avain ei kelpaa tai repoa ei löydy". Synkronointi
   pysähtyy, kunnes avain vaihdetaan. Paikalliset tiedot säilyvät.
 
@@ -163,6 +167,11 @@ UTF-8 koodataan erikseen (`TextEncoder`), ei pelkällä `btoa`:lla.
 - Kaikki käyttöliittymän tekstit suomeksi.
 - Tuotteen poisto kysyy aina vahvistuksen (käyttäjän päätös vaiheessa 3).
 - Kotinäytön nimi on "Lisäravinteet": iPhone katkaisee yli ~12 merkin nimet.
+- `<dialog id="dlg">` on `index.html`:ssä eikä `render()`:in piirtämässä alueessa.
+  Taustasynkronointi kutsuu `render()`:iä, eikä se saa sulkea auki olevaa dialogia.
+- Dialogin vastausta ei päätellä `close`-tapahtumasta: edellisen dialogin
+  sulkeminen jonottaa sellaisen, ja se tulkittaisiin seuraavan dialogin vastaukseksi.
+  Kuuntele omia painikkeita ja `cancel`-tapahtumaa (Esc).
 - Käyttäjän syöte escapetaan aina ennen HTML:ään lisäämistä (`esc()`).
   Tämä on nyt tietoturvakriittistä, koska XSS voisi lukea avaimen.
 - Avainta ei koskaan lokiteta, näytetä kokonaan eikä lähetetä muualle kuin api.github.com:iin.

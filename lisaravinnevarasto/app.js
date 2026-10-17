@@ -1,4 +1,4 @@
-// Käyttöliittymä. Laskenta: logic.js, tallennus: storage.js.
+// Käyttöliittymä. Laskenta: logic.js, tallennus: storage.js, synkronointi: sync.js.
 
 import {
   today, iso, fiDate, num, perDay, left, daysLeft, runOutDate, statusOf,
@@ -6,18 +6,25 @@ import {
 } from './logic.js';
 import { loadState, saveState, requestPersist } from './storage.js';
 import { SEED } from './seed.js';
+import { createClient, REPO } from './github.js';
+import { syncNow, applyResult, markDirty, loadToken, saveToken, clearToken } from './sync.js';
 
 const app = document.getElementById('app');
 
 function getStorage() {
   try { return window.localStorage; } catch { return null; }
 }
-const storage = getStorage() || { getItem() { throw new Error(); }, setItem() { throw new Error(); } };
+const storage = getStorage()
+  || { getItem() { throw new Error(); }, setItem() { throw new Error(); }, removeItem() { throw new Error(); } };
 
 const loaded = loadState(storage, SEED);
 let state = loaded.state;
 let saveStatus = loaded.status === 'unavailable' ? 'unavailable' : 'idle';
 const corrupt = loaded.status === 'corrupt';
+
+// Synkronoinnin tila: off | syncing | ok | offline | auth | ratelimit | corrupt | error
+let sync = { status: loadToken(storage) ? 'syncing' : 'off', at: null };
+let conflicts = [];
 
 /* ---------- render ---------- */
 
@@ -39,6 +46,12 @@ function render() {
   if (corrupt) {
     h += '<p class="alert">Tallennetut tiedot olivat vioittuneet, joten lista aloitettiin tyhjästä. '
        + 'Vanhat tiedot on kopioitu talteen selaimen muistiin.</p>';
+  }
+
+  if (conflicts.length) {
+    h += '<div class="alert" role="alert"><b>Kaikki toisen laitteen muutokset eivät mahtuneet mukaan</b><ul>'
+       + conflicts.map((c) => '<li>' + esc(conflictText(c)) + '</li>').join('')
+       + '</ul><button class="btn sm" data-act="dismiss-conflicts">Selvä</button></div>';
   }
 
   h += '<dl class="summary">'
@@ -95,11 +108,22 @@ function render() {
 
   h += '<div class="addrow"><button class="btn primary grow" data-act="add">+ Lisää lisäravinne</button></div>';
 
+  h += '<section class="sync"><h2>Synkronointi</h2>';
+  if (!loadToken(storage)) {
+    h += '<p>Pidä samat tiedot puhelimessa ja iPadissa.</p>'
+       + '<div class="acts"><button class="btn" data-act="sync-setup">Ota käyttöön</button></div>';
+  } else {
+    h += '<p>Tiedot synkronoidaan yksityiseen repoon ' + esc(REPO) + '.</p>'
+       + '<div class="acts"><button class="btn" data-act="sync-now">Synkronoi nyt</button>'
+       + '<button class="btn ghost" data-act="sync-remove">Poista avain tästä laitteesta</button></div>';
+  }
+  h += '</section>';
+
   h += '<p class="note">Jäljellä oleva määrä on arvio: se lasketaan viimeksi kirjaamastasi saldosta '
      + 'ja päivittäisestä annostuksesta. Tarkista silloin tällöin purkista todellinen määrä ja korjaa se '
      + '“Laskin saldon” -painikkeella.</p>';
 
-  h += '</div><dialog id="dlg"></dialog>';
+  h += '</div>';
   app.innerHTML = h;
   paintSave();
 }
@@ -111,17 +135,29 @@ function paintSave() {
   if (!dot || !txt) return;
   const map = {
     idle:        ['', 'Päivitetty ' + (state.updatedAt ? fiDate(new Date(state.updatedAt + 'T00:00')) : '–')],
-    saved:       ['ok', 'Tallennettu puhelimeen'],
+    saved:       ['ok', 'Tallennettu laitteelle'],
     unavailable: ['bad', 'Ei tallennu: selain estää tallennuksen (yksityinen selaus?)'],
   };
-  const m = map[saveStatus] || map.idle;
+  const syncMap = {
+    syncing:   ['busy', 'Synkronoidaan…'],
+    ok:        ['ok', 'Synkronoitu ' + clock(sync.at)],
+    offline:   ['busy', 'Ei yhteyttä – muutokset lähtevät, kun yhteys palaa'],
+    auth:      ['bad', 'Avain ei kelpaa – tarkista synkronointi'],
+    ratelimit: ['busy', 'GitHub ruuhkautunut – yritetään myöhemmin'],
+    corrupt:   ['bad', 'Pilven tiedosto on vioittunut – synkronointi pysäytetty'],
+    error:     ['bad', 'Synkronointi epäonnistui – yritetään myöhemmin'],
+  };
+  const m = saveStatus === 'unavailable' ? map.unavailable
+    : (syncMap[sync.status] || map[saveStatus] || map.idle);
   dot.className = 'dot ' + m[0];
   txt.textContent = m[1];
 }
 
 function commit() {
   saveStatus = saveState(storage, state) ? 'saved' : 'unavailable';
+  markDirty(storage);
   render();
+  scheduleSync(2000);
 }
 
 function toast(msg) {
@@ -131,6 +167,131 @@ function toast(msg) {
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2200);
+}
+
+/* ---------- synkronointi ---------- */
+
+let syncing = false, again = false, syncTimer = null;
+
+function clock(d) {
+  if (!d) return '';
+  const hm = 'klo ' + d.getHours() + '.' + String(d.getMinutes()).padStart(2, '0');
+  return iso(d) === iso(today()) ? hm : fiDate(d) + ' ' + hm;
+}
+
+function conflictText(c) {
+  if (c.kind === 'deleted-here-kept') return c.name + ': poistit tuotteen tällä laitteella, mutta sitä muutettiin toisella. Tuote palautettiin.';
+  if (c.kind === 'deleted-there-kept') return c.name + ': tuote oli poistettu toisella laitteella, mutta muutit sitä täällä. Tuote säilytettiin.';
+  return c.name + ': molemmilla laitteilla oli muutos. Tämän laitteen muutos jäi voimaan, toisen laitteen muutos jäi pois.';
+}
+
+function scheduleSync(ms) {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => runSync(), ms);
+}
+
+// force: käyttäjä painoi "Synkronoi nyt". Avainvirheen jälkeen automaattiset
+// yritykset pysähtyvät, kunnes avain vaihdetaan tai käyttäjä yrittää itse.
+async function runSync(force = false) {
+  const token = loadToken(storage);
+  if (!token) { sync = { status: 'off', at: null }; paintSave(); return; }
+  if (!force && (sync.status === 'auth' || sync.status === 'corrupt')) return;
+  if (syncing) { again = true; return; }
+
+  syncing = true;
+  sync = { ...sync, status: 'syncing' };
+  paintSave();
+  const snapshot = structuredClone(state);
+  const res = await syncNow({ client: createClient({ token }), storage, local: snapshot, confirmReplace });
+  syncing = false;
+
+  if (res.status === 'synced') {
+    const r = applyResult(snapshot, state, res.state);
+    state = r.state;
+    saveState(storage, state);
+    if (r.dirty) { markDirty(storage); again = true; }
+    conflicts = conflicts.concat(res.conflicts);
+    sync = { status: 'ok', at: new Date() };
+    render();
+  } else if (res.status === 'unchanged') {
+    sync = { status: 'ok', at: new Date() };
+    paintSave();
+  } else if (res.status === 'declined') {
+    clearToken(storage);
+    sync = { status: 'off', at: null };
+    render();
+    toast('Synkronointia ei otettu käyttöön');
+  } else {
+    sync = { status: ['offline', 'auth', 'ratelimit', 'corrupt'].includes(res.error) ? res.error : 'error', at: sync.at };
+    paintSave();
+  }
+
+  if (again) { again = false; scheduleSync(500); }
+}
+
+function confirmReplace(remote) {
+  return new Promise((resolve) => {
+    const when = remote.updatedAt ? fiDate(new Date(remote.updatedAt + 'T00:00')) : '–';
+    const body = '<form method="dialog" class="dlg" id="frm">'
+      + '<h2>Pilvessä on jo tiedot</h2>'
+      + '<p class="hint">Pilvessä on ' + remote.items.length + ' tuotetta (päivitetty ' + esc(when) + '). '
+      + 'Korvataanko tämän laitteen ' + state.items.length + ' tuotetta niillä?</p>'
+      + '<div class="dlgacts">'
+      + '<button type="button" class="btn" data-x="cancel">Ei, peruuta</button>'
+      + '<button type="submit" class="btn primary">Korvaa</button>'
+      + '</div></form>';
+    // Ei kuunnella 'close'-tapahtumaa: edellisen dialogin sulkeminen jonottaa
+    // sellaisen, ja se tulkittaisiin heti vastaukseksi "ei".
+    showDialog(body, (dlg) => {
+      let answered = false;
+      const ac = new AbortController();
+      const answer = (v) => { if (!answered) { answered = true; ac.abort(); resolve(v); } };
+      dlg.querySelector('#frm').addEventListener('submit', () => answer(true));
+      dlg.querySelector('[data-x="cancel"]').addEventListener('click', () => answer(false));
+      dlg.addEventListener('cancel', () => answer(false), { signal: ac.signal });
+    });
+  });
+}
+
+function openSyncSetup() {
+  const body = '<form method="dialog" class="dlg" id="frm">'
+    + '<h2>Synkronointi</h2>'
+    + '<p class="hint">Liitä GitHubissa luomasi avain (alkaa <code>github_pat_</code>). '
+    + 'Avain tallentuu vain tälle laitteelle, ja se toimii vain repoon ' + esc(REPO) + '.</p>'
+    + '<div class="fields">'
+    + field('token', 'Avain', '', 'password', 'required autocomplete="off" autocapitalize="off" spellcheck="false"')
+    + '</div>'
+    + '<p class="err" id="tokerr" hidden></p>'
+    + '<div class="dlgacts">'
+    + '<button type="button" class="btn" data-x="cancel">Peruuta</button>'
+    + '<button type="submit" class="btn primary" id="tokok">Yhdistä</button>'
+    + '</div></form>';
+
+  showDialog(body, (dlg) => {
+    dlg.querySelector('#frm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = e.target.elements.token.value.trim();
+      const btn = dlg.querySelector('#tokok'), err = dlg.querySelector('#tokerr');
+      btn.disabled = true;
+      btn.textContent = 'Tarkistetaan…';
+      err.hidden = true;
+      try {
+        await createClient({ token }).check();
+      } catch (ex) {
+        err.textContent = ex.kind === 'offline' ? 'Ei yhteyttä. Yritä uudelleen.'
+          : ex.kind === 'auth' ? 'Avain ei kelpaa tai sillä ei ole pääsyä repoon ' + REPO + '.'
+          : 'Tarkistus epäonnistui (' + (ex.kind || 'tuntematon virhe') + ').';
+        err.hidden = false;
+        btn.disabled = false;
+        btn.textContent = 'Yhdistä';
+        return;
+      }
+      saveToken(storage, token);
+      dlg.close();
+      render();
+      runSync(true);
+    });
+  });
 }
 
 /* ---------- dialogit ---------- */
@@ -222,6 +383,7 @@ function showDialog(html, wire) {
   dlg.innerHTML = html;
   dlg.querySelectorAll('[data-x="cancel"]').forEach((b) => b.addEventListener('click', () => dlg.close()));
   wire(dlg);
+  if (dlg.open) dlg.close();
   dlg.showModal();
 }
 
@@ -246,6 +408,17 @@ app.addEventListener('click', (e) => {
     return;
   }
 
+  if (act === 'sync-setup') return openSyncSetup();
+  if (act === 'sync-now') return runSync(true);
+  if (act === 'dismiss-conflicts') { conflicts = []; render(); return; }
+  if (act === 'sync-remove') {
+    if (!confirm('Poistetaanko avain tästä laitteesta? Tiedot säilyvät laitteella, mutta ne eivät enää synkronoidu.')) return;
+    clearToken(storage);
+    sync = { status: 'off', at: null };
+    render();
+    return;
+  }
+
   if (act === 'copy') {
     const text = shoppingListText(state.items);
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -258,14 +431,18 @@ app.addEventListener('click', (e) => {
   }
 });
 
-// Päivä vaihtuu, kun sovellus on auki taustalla: piirretään uudelleen palatessa.
+// Palattaessa sovellukseen: synkronoidaan, ja jos päivä vaihtui, piirretään uudelleen.
 let renderedDay = iso(today());
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && iso(today()) !== renderedDay) {
+  if (document.visibilityState !== 'visible') return;
+  if (iso(today()) !== renderedDay) {
     renderedDay = iso(today());
     render();
   }
+  runSync();
 });
+window.addEventListener('online', () => runSync());
 
 render();
 requestPersist();
+runSync();

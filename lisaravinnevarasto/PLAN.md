@@ -50,7 +50,7 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 - Huom: GET:n CORS todennettu (Access-Control-Allow-Origin: *). PUT:n preflightia ei
   voitu todentaa pilviympäristön välityspalvelimen takia → varmistetaan vaiheessa 10.
 
-## [ ] Vaihe 8: Synkronoinnin kulku
+## [x] Vaihe 8: Synkronoinnin kulku
 - `sync.js`: CLAUDE.md:n kulku kohdat 1–7, ensimmäinen kytkentä, uudelleenyritykset
 - Synkronoinnin tila localStorageen (`lisaravinnevarasto.sync`)
 - Testit korvatulla GitHubilla: kaksi "laitetta" samaa etärepoa vasten
