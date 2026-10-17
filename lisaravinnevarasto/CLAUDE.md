@@ -41,6 +41,9 @@ Synkronointi on lisäosa. Ilman avainta sovellus toimii kuten ennenkin, vain pai
 | Synkronointi kolmessa tiedostossa: `merge.js`, `github.js`, `sync.js` | Yhdistäminen on puhdas funktio. GitHub-kutsut saavat `fetch`in parametrina, joten molemmat voi testata ilman nettiä. | Kaikki `app.js`:ssä |
 | Ei service workeria | Service worker tuo välimuistiongelmia ("miksi päivitys ei näy?"). localStorage riittää offline-käyttöön, kun sovellus on kerran latautunut. | Täysi PWA |
 | Ulkoasu kopioidaan prototyypistä | Visio: näyttää samalta kuin nyt. | Uusi design |
+| Ostoslista täytetään rahtivapaaseen (89 €), laskenta `logic.js`:n `orderList()`:ssa | Visio, ominaisuus 6. Puhdas funktio, testattavissa. Lisätty 17.10.2026. | Lista vain tilausrajan alittaneista (rahtia maksettaisiin), pelkkä arvoraja ilman tilausrajaa (lista näkyisi aina, koska kaikki tuotteet yhteensä > 89 €) |
+| Rahtivapaan raja 89 € on vakio koodissa (`FREE_SHIPPING_EUR`) | Muuttuu harvoin. Asetuksena se pitäisi synkronoida, ja `merge.js` yhdistää vain tuotteita. | Asetus sovelluksessa |
+| Hinnat syötetään käsin, ei automaattista hakua | Visio. Selain ei voi lukea sinunapteekki.fi:tä (CORS), ja haku vaatisi palvelinosan (esim. GitHub Actions). Käyttäjä valitsi vain kierroksen 1. | GitHub Actions -ajo, joka hakee hinnat ja luo issuen push-ilmoitukseksi (mahdollinen myöhempi kierros) |
 
 ## Tiedostorakenne
 
@@ -51,7 +54,7 @@ lisaravinnevarasto/
 ├─ PLAN.md              toteutusvaiheet
 ├─ index.html           sivun runko, lataa muut tiedostot
 ├─ style.css            ulkoasu (prototyypin CSS)
-├─ logic.js             puhtaat funktiot: päivämäärät, saldo, tila, ostoslista
+├─ logic.js             puhtaat funktiot: päivämäärät, saldo, tila, ostoslista (orderList)
 ├─ storage.js           lataus ja tallennus localStorageen
 ├─ merge.js             kolmitieyhdistäminen (puhdas funktio)
 ├─ github.js            GitHub Contents API: lue ja kirjoita varasto.json
@@ -86,7 +89,8 @@ data-repon tiedostossa `varasto.json`.
       "threshold": 14,
       "remaining": 243,
       "asOf": "2026-09-10",
-      "note": "aamu"
+      "note": "aamu",
+      "price": 24.90
     }
   ]
 }
@@ -97,7 +101,31 @@ data-repon tiedostossa `varasto.json`.
 - Kun käyttäjä kirjaa saldon tai uuden purkin, `remaining` päivitetään ja `asOf` = tänään.
 - Päivämäärät ovat paikallista aikaa muodossa `YYYY-MM-DD`. Ei UTC-muunnoksia.
 - Tila: `out` jos päiviä ≤ 0, `low` jos päiviä ≤ `threshold`, muuten `ok`.
-- Ostoslista: purkkeja niin monta, että saldo riittää 60 päivää, vähintään 1.
+- `price`: pakkauksen hinta euroina sinunapteekki.fi:ssä. Valinnainen: puuttuu
+  vanhoista tuotteista ja tuotteista, joille käyttäjä ei ole syöttänyt hintaa.
+
+## Ostoslista (`orderList`)
+
+Vakiot `logic.js`:ssä: `FREE_SHIPPING_EUR = 89`, `SHIPPING_EUR = 3.90`,
+`REFILL_TARGET_DAYS = 60`.
+
+1. **Laukaisu:** listaa ei ole, ellei vähintään yksi tuote ole tilassa `low` tai
+   `out` (päiviä ≤ tilausraja).
+2. **Purkkimäärä** jokaiselle listan tuotteelle: niin monta, että saldo riittää
+   60 päivää, vähintään 1: `ceil((60 × kulutus/pv − jäljellä) / pakkauskoko)`.
+3. **Pakolliset:** kaikki `low`/`out`-tuotteet tulevat listalle, ensin loppuva ensin.
+4. **Täyttö:** jos arvo < 89 €, lisätään seuraavaksi loppuvia tuotteita
+   (ensin loppuva ensin), kunnes arvo ≥ 89 € tai tuotteet loppuvat.
+   Täytteeksi ei oteta tuotteita, joilla ei ole hintaa tai kulutusta.
+5. **Arvo** = Σ purkit × hinta. Pakollinen tuote ilman hintaa on listalla
+   merkinnällä "hinta puuttuu", eikä sitä lasketa arvoon.
+6. Jos kaikki tuotteet on lisätty ja arvo on yhä < 89 €, lista näytetään silti,
+   ja siinä kerrotaan puuttuva summa ja rahti 3,90 €. Mikään ei saa loppua.
+
+Palauttaa `null` (ei listaa) tai
+`{ lines: [{ item, packs, value|null, filler }], total, missing, freeShipping, unpriced }`.
+
+Hinnat näytetään suomalaisittain: `90,60 €`.
 
 Synkronoinnin tila, avain `lisaravinnevarasto.sync`:
 
@@ -179,7 +207,9 @@ UTF-8 koodataan erikseen (`TextEncoder`), ei pelkällä `btoa`:lla.
 - Muutos `logic.js`:ään, `storage.js`:ään, `merge.js`:ään, `github.js`:ään tai
   `sync.js`:ään → lisää tai päivitä testi.
 - Älä lisää ominaisuuksia, joita VISION.md ei mainitse. Ehdota ne käyttäjälle.
-- Jos tietomalli muuttuu, nosta versiota (`v2`) ja kirjoita siirto vanhasta.
+- Jos tietomallin olemassa olevan kentän merkitys tai muoto muuttuu, nosta versiota
+  (`v2`) ja kirjoita siirto vanhasta. Uusi valinnainen kenttä (kuten `price`) ei vaadi
+  versionnostoa, kunhan puuttuva arvo toimii.
 - Selaimen tallennus voi epäonnistua (yksityinen selaus). Kääri
   localStorage-kutsut try/catchiin ja näytä käyttäjälle selkeä viesti.
 

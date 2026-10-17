@@ -68,3 +68,25 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 - Käyttäjä luo yksityisen repon ja avaimen (CLAUDE.md:n ohje)
 - iPhone ensin, sitten iPad
 - Valmis kun: VISION.md:n onnistumisehto toteutuu molempiin suuntiin
+
+---
+
+# Ominaisuus: ostoslista rahtivapaaseen tilaukseen
+
+Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Ostoslista".
+
+## [ ] Vaihe 11: Laskenta
+- `logic.js`: `orderList()`, `formatEur()`, vakiot; vanha `shoppingList` korvataan
+- Testit: jokainen CLAUDE.md:n kohta 1–6 omana testinään, mukaan lukien
+  pienet nopeasti kuluvat pakkaukset (useampi purkki) ja hinnaton tuote
+- Valmis kun: testit menevät läpi
+
+## [ ] Vaihe 12: Käyttöliittymä
+- Hinta-kenttä lomakkeeseen
+- Ostoslista: purkit × hinta, arvo, "rahtivapaa ✓" / "puuttuu X €", täyte-merkintä
+- Kopioitu lista sisältää määrät, hinnat ja summan
+- Valmis kun: selaintesti menee läpi ja kuvakaappaus on tarkistettu
+
+## [ ] Vaihe 13: Käyttöönotto
+- Käyttäjä syöttää hinnat sinunapteekki.fi:stä (iPhone, synkronoituu iPadille)
+- Valmis kun: VISION.md:n onnistumisehto toteutuu
