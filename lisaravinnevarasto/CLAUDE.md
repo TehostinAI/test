@@ -33,6 +33,7 @@ Synkronointi on lisäosa. Ilman avainta sovellus toimii kuten ennenkin, vain pai
 | Synkronointi yksityiseen GitHub-repoon (`TehostinAI/lisaravinnedata`) | Visio: ilmainen, ei uusia tilejä, tuotelista ei julkinen. Jokainen tallennus on commit, joten versiohistoria toimii samalla varmuuskopiona. Lisätty synkronoinnin yhteydessä. | Supabase, Firebase (uusi tili), gist (vain "salainen linkki", ei yksityinen, eikä rajattu avain toimi gisteille), sama julkinen repo (tiedot julkisia) |
 | Fine-grained-avain, joka toimii vain data-repoon (Contents: read/write) | Jos avain vuotaa, vahinko rajoittuu tähän yhteen repoon. Käyttäjä valitsi "avain kerran per laite". | Classic token (pääsy kaikkiin repoihin), avain koodissa (julkinen → GitHub mitätöi sen) |
 | Ristiriidat yhdistetään tuote kerrallaan (kolmitie) | Visio: mikään kirjaus ei saa kadota huomaamatta. Eri tuotteiden muutokset yhdistyvät automaattisesti. Saman tuotteen ristiriidassa tämän laitteen muutos voittaa, ja käyttäjälle kerrotaan, mikä toisen laitteen muutos jäi pois. | "Viimeisin voittaa" koko tiedostolle (hävittää hiljaa), aikaleimat per tuote (laitteiden kellot voivat erota) |
+| Avaimen vanhenemisesta muistuttaa GitHubin sähköposti, ei sovellus | Sovellus ei voi tietää vanhenemispäivää: GitHub lähettää sen otsakkeessa `github-authentication-token-expiration`, mutta CORS ei näytä otsaketta selaimelle (tarkistettu `Access-Control-Expose-Headers`-listasta 17.10.2026). Käyttäjän päätös. | Käyttäjä syöttää päivämäärän sovellukseen, avain ilman vanhenemista |
 | GitHub Pages | Repo on julkinen, joten Pages on ilmainen. Ei uutta palvelua tai tunnusta. | Netlify, Cloudflare Pages (toimisivat, mutta vaativat uuden tilin) |
 | Lähtödata koodissa (`seed.js`) | Käyttäjän päätös: julkisuus on ok. | Tuontilinkki, käsin syöttö |
 | Laskentalogiikka omassa tiedostossa (`logic.js`) | Puhtaat funktiot voi testata ilman selainta. Laskenta on sovelluksen tärkein osa. | Kaikki yhdessä tiedostossa kuten prototyypissä |
@@ -216,9 +217,13 @@ Jos `icon.svg` muuttuu, luo PNG:t uudelleen.
 3. iPhone ensin: sovelluksen asetukset → liitä avain → tiedot lähtevät repoon.
 4. iPad: lisää sovellus kotinäytölle → liitä sama avain → vahvista tietojen haku.
 
-Otettu käyttöön 17.10.2026 iPhonella ja iPadilla. Käyttäjän avain ei vanhene
-("never expire", käyttäjän tietoinen valinta). Jos avain vuotaa, se poistetaan GitHubista
+Otettu käyttöön 17.10.2026 iPhonella ja iPadilla. Avain on voimassa 90 päivää,
+eli se vanhenee noin 15.1.2027. Jos avain vuotaa, se poistetaan GitHubista
 (Settings → Developer settings → Fine-grained tokens) ja tehdään uusi.
+
+Avaimen vaihto: tee uusi avain kohdan 2 mukaan → kummallakin laitteella
+"Poista avain tästä laitteesta" → "Ota käyttöön" → liitä uusi avain. iPhone ensin.
+Toinen laite kysyy "Korvataanko tiedot?" → Korvaa (pilvessä on ajantasaiset tiedot).
 
 ## Tunnetut riskit
 
@@ -227,8 +232,9 @@ Käyttäjällä on iPhone ja iPad, joten testaa ja ohjeista ensisijaisesti Safar
 - **Kaikki `tehostinai.github.io`-sivut jakavat saman localStoragen.** Mikä
   tahansa muu käyttäjän Pages-sivu (esim. repon juuren `index.html`) voisi
   lukea avaimen. Älä julkaise käyttäjän Pagesissa vierasta tai epäluotettavaa koodia.
-- **Avain voi vanhentua** (käyttäjä valitsee voimassaolon). Silloin sovellus
-  näyttää "Avain ei kelpaa", ja käyttäjä tekee uuden avaimen kohdan 2 mukaan.
+- **Avain vanhenee** (nykyinen ~15.1.2027). GitHub muistuttaa sähköpostilla
+  muutamaa päivää ennen. Vanhentuneella avaimella sovellus näyttää "Avain ei
+  kelpaa"; tiedot säilyvät laitteilla. Vaihto: ks. "Avaimen vaihto" yllä.
 - **Safari voi poistaa localStorage-tiedot**, jos sivulla ei käydä 7 päivään.
   Kotinäytölle lisätty sovellus ei kuulu tämän säännön piiriin. Lisäksi
   kutsutaan `navigator.storage.persist()`. Synkronoinnin kanssa tiedot

@@ -39,8 +39,8 @@ ja näyttää samalta. Prototyypin 10 tuotetta tulevat mukaan valmiina lähtöda
   joten laitteen vaihtuminen ei hävitä niitä.
 - Ei useita käyttäjiä
 - Ei tilaa mitään itse, eikä seuraa hintoja tai ostohistoriaa
-- Ei ilmoituksia
-- Ei uusia ominaisuuksia prototyyppiin verrattuna
+- Ei push-ilmoituksia eikä muistutuksia. Avaimen vanhenemisesta muistuttaa
+  GitHub sähköpostilla, ja sovellus kertoo, jos avain ei enää kelpaa.
 
 ## Rajoitteet
 - Ilmainen: ei kuukausimaksuja
