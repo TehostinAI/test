@@ -15,12 +15,17 @@ poikkeukset: uuden purkin tai purkista lasketun todellisen määrän.
 
 ## Ydinominaisuudet
 1. Tuotteen lisäys, muokkaus ja poisto (nimi, annos, kertaa päivässä,
-   pakkauskoko, yksikkö, tilausraja päivinä, muistiinpano)
+   pakkauskoko, yksikkö, tilausraja päivinä, pakkauksen hinta, muistiinpano)
 2. Arvioitu jäljellä oleva määrä ja päiviä jäljellä jokaiselle tuotteelle
 3. Tila-merkintä: riittää / tilaa pian / loppunut
 4. "+ Uusi purkki" lisää pakkauskoon saldoon yhdellä napautuksella
 5. "Laskin saldon" korjaa arvion todelliseksi
-6. Ostoslista tilausrajan alittaneista tuotteista ja sen kopiointi
+6. Ostoslista, joka on aina rahtivapaa tilaus sinunapteekki.fi:hin:
+   - Ostoslista ilmestyy, kun jokin tuote alittaa tilausrajansa (esim. 14 pv).
+   - Listaa täydennetään seuraavaksi loppuvilla tuotteilla järjestyksessä,
+     kunnes tilauksen arvo on vähintään rahtivapaan raja (89 € noutopisteeseen).
+   - Näen tilauksen arvon ja paljonko rajaan puuttuu, ja voin kopioida listan.
+   - Tavoitteena on tilata ajoissa, mutta aina rahtivapaasti.
 7. Lista järjestetty niin, että ensimmäisenä loppuva on ylimpänä
 8. Samat tiedot puhelimessa ja iPadissa: toisella laitteella tehty kirjaus
    näkyy toisella, kun avaan sovelluksen. En tee siirtoa käsin.
@@ -38,7 +43,9 @@ ja näyttää samalta. Prototyypin 10 tuotetta tulevat mukaan valmiina lähtöda
 - Ei erillistä varmuuskopiotoimintoa. Tiedot säilyvät synkronoinnin kautta,
   joten laitteen vaihtuminen ei hävitä niitä.
 - Ei useita käyttäjiä
-- Ei tilaa mitään itse, eikä seuraa hintoja tai ostohistoriaa
+- Ei tilaa mitään itse
+- Ei hae hintoja automaattisesti: syötän pakkauksen hinnan itse
+  sinunapteekki.fi:stä. Ei ostohistoriaa eikä hintaseurantaa.
 - Ei push-ilmoituksia eikä muistutuksia. Avaimen vanhenemisesta muistuttaa
   GitHub sähköpostilla, ja sovellus kertoo, jos avain ei enää kelpaa.
 
@@ -59,3 +66,6 @@ Käytän sitä prototyypin sijaan.
 
 Kirjaan iPhonella uuden purkin, avaan iPadin sovelluksen, ja muutos näkyy siellä.
 Sama toimii toiseen suuntaan.
+
+Kun ostoslista ilmestyy, sen arvo on vähintään 89 €, ja voin kopioida sen ja
+tilata sinunapteekki.fi:stä ilman toimituskuluja ennen kuin mikään loppuu.
