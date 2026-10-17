@@ -3,6 +3,8 @@
 
 export const DAY = 86400000;
 export const REFILL_TARGET_DAYS = 60;
+export const FREE_SHIPPING_EUR = 89;   // sinunapteekki.fi, noutopiste (tarkistettu 17.10.2026)
+export const SHIPPING_EUR = 3.9;
 
 /* ---------- päivämäärät (paikallista aikaa) ---------- */
 
@@ -105,6 +107,67 @@ export function shoppingListText(items, day = today()) {
   return shoppingList(items, day)
     .map(({ item, packs }) => item.name + ' – ' + packsLabel(packs) + ' (' + num(item.packSize) + ' kpl)')
     .join('\n');
+}
+
+/* ---------- ostoslista rahtivapaaseen tilaukseen (CLAUDE.md, "Ostoslista") ---------- */
+
+// Hinta sentteinä tai null. Sentit, jotta 3 × 19,90 on tasan 59,70.
+function priceCents(it) {
+  if (it.price == null || it.price === '') return null;
+  const p = num(it.price);
+  return p > 0 ? Math.round(p * 100) : null;
+}
+
+export function hasPrice(it) {
+  return priceCents(it) !== null;
+}
+
+// Palauttaa null (ei listaa) tai
+// { lines: [{ item, packs, value, filler }], total, missing, freeShipping, unpriced }
+export function orderList(items, day = today()) {
+  const free = Math.round(FREE_SHIPPING_EUR * 100);
+  const sorted = sortBySoonest(items, day).filter((it) => perDay(it) > 0);
+  if (!sorted.some((it) => needsOrder(it, day))) return null;
+
+  const lines = [];
+  let cents = 0;
+  const add = (it, filler) => {
+    const packs = packsNeeded(it, day);
+    const p = priceCents(it);
+    if (p !== null) cents += packs * p;
+    lines.push({ item: it, packs, value: p === null ? null : (packs * p) / 100, filler });
+  };
+
+  for (const it of sorted) if (needsOrder(it, day)) add(it, false);
+  for (const it of sorted) {
+    if (cents >= free) break;
+    if (!needsOrder(it, day) && hasPrice(it)) add(it, true);
+  }
+
+  return {
+    lines,
+    total: cents / 100,
+    missing: Math.max(0, free - cents) / 100,
+    freeShipping: cents >= free,
+    unpriced: lines.filter((l) => l.value === null).length,
+  };
+}
+
+export function formatEur(n) {
+  return num(n).toFixed(2).replace('.', ',') + ' €';
+}
+
+export function orderListText(list) {
+  if (!list) return '';
+  const rows = list.lines.map(({ item, packs, value }) =>
+    item.name + ' – ' + packsLabel(packs) + ' (' + num(item.packSize) + ' kpl) – '
+    + (value === null ? 'hinta puuttuu' : formatEur(value)));
+  rows.push('');
+  rows.push('Yhteensä ' + formatEur(list.total) + (list.freeShipping
+    ? ' – rahtivapaa'
+    : ' – rahtivapaaseen puuttuu ' + formatEur(list.missing) + ' (rahti ' + formatEur(SHIPPING_EUR) + ')'));
+  if (list.unpriced) rows.push('Hinta puuttuu ' + list.unpriced + ' tuotteelta, eikä niitä ole laskettu summaan.');
+  return rows.join('\n');
 }
 
 /* ---------- kirjaukset (palauttavat uuden tuotteen, eivät muuta vanhaa) ---------- */

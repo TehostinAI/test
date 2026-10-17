@@ -76,13 +76,15 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Ostoslista".
 
 ## [ ] Vaihe 11: Laskenta
-- `logic.js`: `orderList()`, `formatEur()`, vakiot; vanha `shoppingList` korvataan
+- `logic.js`: `orderList()`, `formatEur()`, vakiot. Vanha `shoppingList` jää rinnalle,
+  koska push julkaisee sovelluksen heti; se poistetaan vaiheessa 12.
 - Testit: jokainen CLAUDE.md:n kohta 1–6 omana testinään, mukaan lukien
   pienet nopeasti kuluvat pakkaukset (useampi purkki) ja hinnaton tuote
 - Valmis kun: testit menevät läpi
 
 ## [ ] Vaihe 12: Käyttöliittymä
 - Hinta-kenttä lomakkeeseen
+- `app.js` siirretään `orderList`iin, vanha `shoppingList(Text)` ja sen testi poistetaan
 - Ostoslista: purkit × hinta, arvo, "rahtivapaa ✓" / "puuttuu X €", täyte-merkintä
 - Kopioitu lista sisältää määrät, hinnat ja summan
 - Valmis kun: selaintesti menee läpi ja kuvakaappaus on tarkistettu
