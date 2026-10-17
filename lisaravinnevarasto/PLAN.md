@@ -9,7 +9,7 @@ Merkitse vaihe valmiiksi `[x]`, kun käyttäjä on hyväksynyt sen.
 - `test/logic.test.js`: testit kaikille laskennan säännöille
 - Valmis kun: testit menevät läpi (UTC ja Europe/Helsinki)
 
-## [ ] Vaihe 2: Tallennus ja lähtödata
+## [x] Vaihe 2: Tallennus ja lähtödata
 - `seed.js`: prototyypin 10 tuotetta
 - `storage.js`: lataus/tallennus localStorageen CLAUDE.md:n sääntöjen mukaan
   (seed vain kun avainta ei ole, try/catch, `navigator.storage.persist()`)
