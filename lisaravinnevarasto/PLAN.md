@@ -16,7 +16,7 @@ Merkitse vaihe valmiiksi `[x]`, kun käyttäjä on hyväksynyt sen.
 - Testit lataussäännöille (localStorage korvataan testissä)
 - Valmis kun: testit menevät läpi
 
-## [ ] Vaihe 3: Käyttöliittymä
+## [x] Vaihe 3: Käyttöliittymä
 - `index.html`, `style.css`, `app.js` prototyypin pohjalta
 - Kaikki 7 ydinominaisuutta toimivat
 - Valmis kun: sovellus toimii paikallisesti selaimessa ja näyttää samalta

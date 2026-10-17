@@ -43,7 +43,8 @@ lisaravinnevarasto/
 ├─ app.js               käyttöliittymä: renderöinti, dialogit
 ├─ seed.js              prototyypin 10 tuotetta lähtödatana
 ├─ manifest.webmanifest kotinäytön nimi, väri ja kuvake
-├─ icon-192.png, icon-512.png, apple-touch-icon.png
+├─ icon.svg             kuvakkeen lähdekuva ja selaimen välilehden kuvake
+├─ icon-192.png, icon-512.png, apple-touch-icon.png   luotu icon.svg:stä
 └─ test/               logic.test.js, storage.test.js
 ```
 
@@ -96,6 +97,8 @@ localStorage-avain `lisaravinnevarasto.v1`, arvo JSON:
 - Ei npm-paketteja, CDN-kirjastoja eikä build-työkaluja. Ainoa ulkoinen
   resurssi on Google Fonts, kuten prototyypissä.
 - Kaikki käyttöliittymän tekstit suomeksi.
+- Tuotteen poisto kysyy aina vahvistuksen (käyttäjän päätös vaiheessa 3).
+- Kotinäytön nimi on "Lisäravinteet": iPhone katkaisee yli ~12 merkin nimet.
 - Käyttäjän syöte escapetaan aina ennen HTML:ään lisäämistä (`esc()`).
 - Muutos `logic.js`:ään tai `storage.js`:ään → lisää tai päivitä testi.
 - Älä lisää ominaisuuksia, joita VISION.md ei mainitse. Ehdota ne käyttäjälle.
@@ -113,6 +116,12 @@ python3 -m http.server 8000 --directory lisaravinnevarasto
 node --test 'lisaravinnevarasto/test/*.test.js'
 TZ=Europe/Helsinki node --test 'lisaravinnevarasto/test/*.test.js'
 ```
+
+## Kuvakkeet
+
+PNG-kuvakkeet luodaan `icon.svg`:stä renderöimällä se selaimessa kokoihin
+180 (`apple-touch-icon.png`), 192 ja 512. iPhone ei tue SVG-kotinäyttökuvaketta.
+Jos `icon.svg` muuttuu, luo PNG:t uudelleen.
 
 ## Julkaisu
 
