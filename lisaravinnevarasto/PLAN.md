@@ -89,6 +89,6 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Ostoslista".
 - Kopioitu lista sisältää määrät, hinnat ja summan
 - Valmis kun: selaintesti menee läpi ja kuvakaappaus on tarkistettu
 
-## [ ] Vaihe 13: Käyttöönotto
+## [x] Vaihe 13: Käyttöönotto
 - Käyttäjä syöttää hinnat sinunapteekki.fi:stä (iPhone, synkronoituu iPadille)
 - Valmis kun: VISION.md:n onnistumisehto toteutuu
