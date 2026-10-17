@@ -42,7 +42,7 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 - Testit: jokainen CLAUDE.md:n yhdistämissääntö omana testinään
 - Valmis kun: testit menevät läpi
 
-## [ ] Vaihe 7: GitHub-yhteys
+## [x] Vaihe 7: GitHub-yhteys
 - `github.js`: hae ja tallenna `varasto.json`, UTF-8-base64, virhetyypit
   (ei verkkoa, avain ei kelpaa, ristiriita 409, tiedostoa ei ole)
 - Testit korvatulla `fetch`illä, ääkköset mukana
