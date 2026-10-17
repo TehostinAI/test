@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   iso, parseISO, fiDate, num, perDay, left, daysLeft, runOutDate, statusOf,
-  sortBySoonest, packsNeeded, shoppingList, shoppingListText, withCount, withRefill, esc,
+  sortBySoonest, packsNeeded, withCount, withRefill, esc,
 } from '../logic.js';
 
 const d = (s) => parseISO(s);
@@ -92,16 +92,6 @@ test('packsNeeded: riittää 60 päivää, vähintään 1', () => {
   assert.equal(packsNeeded(item({ remaining: 10, perDose: 2, packSize: 90 }), day), 2);
   assert.equal(packsNeeded(item({ remaining: 500 }), day), 1);
   assert.equal(packsNeeded(item({ packSize: 0, remaining: 0, perDose: 1 }), day), 60);
-});
-
-test('shoppingList ja teksti: vain low ja out', () => {
-  const day = d('2026-10-01');
-  const items = [
-    item({ name: 'Riittää', remaining: 500 }),
-    item({ name: 'Melkein', remaining: 20, perDose: 2, packSize: 90 }),
-  ];
-  assert.deepEqual(shoppingList(items, day).map((x) => x.item.name), ['Melkein']);
-  assert.equal(shoppingListText(items, day), 'Melkein – 2 purkkia (90 kpl)');
 });
 
 test('withCount ja withRefill: uusi saldo tälle päivälle, alkuperäinen ennallaan', () => {

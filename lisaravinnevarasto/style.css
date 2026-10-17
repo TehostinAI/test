@@ -242,3 +242,16 @@ input[type="number"]{font-family:"IBM Plex Mono",ui-monospace,monospace;font-var
 .alert ul{margin:6px 0 10px;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 .alert b{font-weight:600}
 .err{font-size:.8125rem;color:var(--crit);margin:0}
+
+/* ---- ostoslistan summa ---- */
+.buy .fill{
+  font-size:.625rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 6px;border-radius:99px;background:var(--surface);color:var(--ink-2);vertical-align:2px;
+}
+.buy .total{
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;
+  border-top:1px solid var(--crit);padding-top:8px;font-variant-numeric:tabular-nums;
+}
+.buy .total b{font-weight:600}
+.buy .total .free{color:var(--accent);font-weight:600;font-size:.875rem}
+.buy .total .short{color:var(--crit);font-weight:600;font-size:.875rem}

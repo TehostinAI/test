@@ -93,20 +93,8 @@ export function needsOrder(it, day = today()) {
   return s === 'low' || s === 'out';
 }
 
-export function shoppingList(items, day = today()) {
-  return sortBySoonest(items, day)
-    .filter((it) => needsOrder(it, day))
-    .map((it) => ({ item: it, packs: packsNeeded(it, day) }));
-}
-
 export function packsLabel(n) {
   return n + ' purkki' + (n > 1 ? 'a' : '');
-}
-
-export function shoppingListText(items, day = today()) {
-  return shoppingList(items, day)
-    .map(({ item, packs }) => item.name + ' – ' + packsLabel(packs) + ' (' + num(item.packSize) + ' kpl)')
-    .join('\n');
 }
 
 /* ---------- ostoslista rahtivapaaseen tilaukseen (CLAUDE.md, "Ostoslista") ---------- */

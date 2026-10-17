@@ -2,7 +2,7 @@
 
 import {
   today, iso, fiDate, num, perDay, left, daysLeft, runOutDate, statusOf,
-  sortBySoonest, shoppingList, shoppingListText, packsLabel, withCount, withRefill, esc, uid,
+  sortBySoonest, orderList, orderListText, formatEur, hasPrice, packsLabel, withCount, withRefill, esc, uid,
 } from './logic.js';
 import { loadState, saveState, requestPersist } from './storage.js';
 import { SEED } from './seed.js';
@@ -31,7 +31,7 @@ let conflicts = [];
 function render() {
   const day = today();
   const items = sortBySoonest(state.items, day);
-  const buy = shoppingList(state.items, day);
+  const order = orderList(state.items, day);
   const soonest = items.length ? daysLeft(items[0], day) : null;
 
   let h = '<div class="wrap">';
@@ -56,17 +56,28 @@ function render() {
 
   h += '<dl class="summary">'
      + '<div><dt>Tuotteita</dt><dd>' + state.items.length + '</dd></div>'
-     + '<div><dt>Tilattavaa</dt><dd>' + buy.length + '</dd></div>'
+     + '<div><dt>Tilattavaa</dt><dd>' + (order ? order.lines.length : 0) + '</dd></div>'
      + '<div><dt>Loppuu ensin</dt><dd>' + (soonest === null ? '–' : soonest + '<small>pv</small>') + '</dd></div>'
      + '</dl>';
 
-  if (buy.length) {
+  if (order) {
     h += '<section class="buy"><h2>Ostoslista</h2><ul>';
-    buy.forEach(({ item, packs }) => {
-      h += '<li><b>' + esc(item.name) + '</b><span>' + packsLabel(packs)
-         + ' · ' + num(item.packSize) + ' kpl</span></li>';
+    order.lines.forEach(({ item, packs, value, filler }) => {
+      h += '<li><b>' + esc(item.name) + (filler ? ' <small class="fill">täyte</small>' : '') + '</b>'
+         + '<span>' + packsLabel(packs) + ' · ' + (value === null ? 'hinta puuttuu' : formatEur(value)) + '</span></li>';
     });
-    h += '</ul><footer>'
+    h += '</ul><div class="total"><b>Yhteensä ' + formatEur(order.total) + '</b>'
+       + (order.freeShipping
+         ? '<span class="free">Rahtivapaa ✓</span>'
+         : '<span class="short">Rahtivapaaseen puuttuu ' + formatEur(order.missing) + '</span>')
+       + '</div>';
+    if (order.lines.some((l) => l.filler)) {
+      h += '<p>Täyte = seuraavaksi loppuva tuote, joka on lisätty, jotta tilaus on rahtivapaa.</p>';
+    }
+    if (order.unpriced) {
+      h += '<p>Hinta puuttuu ' + order.unpriced + ' tuotteelta. Lisää hinnat sinunapteekki.fi:stä Muokkaa-kohdasta.</p>';
+    }
+    h += '<footer>'
        + '<button class="btn sm" data-act="copy">Kopioi lista</button>'
        + '<p>Tilaa itse, esim. sinunapteekki.fi</p>'
        + '</footer></section>';
@@ -96,7 +107,9 @@ function render() {
        + '<div class="mlabels"><span>≈ ' + rem + ' kpl jäljellä</span><span>'
        + (st === 'out' ? 'loppui' : 'tyhjä ' + (end ? fiDate(end) : '–')) + '</span></div></div>'
        + '<div class="chips"><span class="chip ' + st + '">' + label + '</span>'
-       + '<span class="chip">tilausraja ' + num(it.threshold) + ' pv</span></div>'
+       + '<span class="chip">tilausraja ' + num(it.threshold) + ' pv</span>'
+       + (hasPrice(it) ? '<span class="chip">' + formatEur(it.price) + ' / purkki</span>' : '')
+       + '</div>'
        + '<div class="acts">'
        + '<button class="btn grow" data-act="refill" data-id="' + esc(it.id) + '">+ Uusi purkki</button>'
        + '<button class="btn grow" data-act="count" data-id="' + esc(it.id) + '">Laskin saldon</button>'
@@ -313,9 +326,12 @@ function openForm(item) {
     + '<div class="f two">' + field('perDose', 'Annos kerrallaan', it.perDose, 'number')
     + field('timesPerDay', 'Kertaa päivässä', it.timesPerDay, 'number') + '</div>'
     + '<div class="f two">' + field('packSize', 'Pakkauskoko (kpl)', it.packSize, 'number')
-    + field('threshold', 'Tilausraja (pv)', it.threshold, 'number') + '</div>'
-    + '<div class="f two">' + field('remaining', 'Jäljellä nyt (kpl)', Math.round(left(it)), 'number')
     + field('form', 'Yksikkö', it.form, 'text', 'placeholder="kapselia"') + '</div>'
+    + '<div class="f two">' + field('remaining', 'Jäljellä nyt (kpl)', Math.round(left(it)), 'number')
+    + field('threshold', 'Tilausraja (pv)', it.threshold, 'number') + '</div>'
+    // type="text": iPhonen numerokenttä ei aina hyväksy pilkkua (24,90).
+    + field('price', 'Hinta / purkki (€), sinunapteekki.fi',
+      hasPrice(it) ? num(it.price).toFixed(2).replace('.', ',') : '', 'text', 'inputmode="decimal" placeholder="esim. 24,90"')
     + field('note', 'Muistiinpano', it.note, 'text', 'placeholder="esim. aamu + ilta"')
     + '</div>'
     + '<p class="hint">Tallennus asettaa saldon tälle päivälle ja alkaa laskea siitä eteenpäin.</p>'
@@ -340,6 +356,8 @@ function openForm(item) {
         asOf: iso(today()),
         note: f.note.value.trim(),
       };
+      const price = num(f.price.value);
+      if (f.price.value.trim() && price > 0) next.price = Math.round(price * 100) / 100;
       state.items = isNew ? [...state.items, next] : state.items.map((x) => (x.id === it.id ? next : x));
       dlg.close();
       commit();
@@ -420,7 +438,7 @@ app.addEventListener('click', (e) => {
   }
 
   if (act === 'copy') {
-    const text = shoppingListText(state.items);
+    const text = orderListText(orderList(state.items));
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(
         () => toast('Ostoslista kopioitu'),

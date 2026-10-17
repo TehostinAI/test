@@ -75,7 +75,7 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Synkronointi
 
 Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Ostoslista".
 
-## [ ] Vaihe 11: Laskenta
+## [x] Vaihe 11: Laskenta
 - `logic.js`: `orderList()`, `formatEur()`, vakiot. Vanha `shoppingList` jää rinnalle,
   koska push julkaisee sovelluksen heti; se poistetaan vaiheessa 12.
 - Testit: jokainen CLAUDE.md:n kohta 1–6 omana testinään, mukaan lukien
