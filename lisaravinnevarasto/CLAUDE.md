@@ -103,8 +103,9 @@ localStorage-avain `lisaravinnevarasto.v1`, arvo JSON:
 # Paikallinen esikatselu: http://localhost:8000
 python3 -m http.server 8000 --directory lisaravinnevarasto
 
-# Testit (Node 18+, ei riippuvuuksia)
-node --test lisaravinnevarasto/test/
+# Testit (Node 22+, ei riippuvuuksia). Aja myös Suomen ajassa kesäaikatestien takia.
+node --test 'lisaravinnevarasto/test/*.test.js'
+TZ=Europe/Helsinki node --test 'lisaravinnevarasto/test/*.test.js'
 ```
 
 ## Julkaisu
@@ -115,6 +116,8 @@ node --test lisaravinnevarasto/test/
 - Julkaisu tapahtuu pushaamalla. Muutos näkyy noin minuutin päästä.
 
 ## Tunnetut riskit
+
+Käyttäjällä on iPhone, joten testaa ja ohjeista ensisijaisesti Safarille.
 
 - **Safari voi poistaa localStorage-tiedot**, jos sivulla ei käydä 7 päivään.
   Kotinäytölle lisätty sovellus ei kuulu tämän säännön piiriin. Käyttäjää
