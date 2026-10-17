@@ -82,7 +82,7 @@ Visio ja arkkitehtuuri päivitetty 17.10.2026. Ks. CLAUDE.md, osio "Ostoslista".
   pienet nopeasti kuluvat pakkaukset (useampi purkki) ja hinnaton tuote
 - Valmis kun: testit menevät läpi
 
-## [ ] Vaihe 12: Käyttöliittymä
+## [x] Vaihe 12: Käyttöliittymä
 - Hinta-kenttä lomakkeeseen
 - `app.js` siirretään `orderList`iin, vanha `shoppingList(Text)` ja sen testi poistetaan
 - Ostoslista: purkit × hinta, arvo, "rahtivapaa ✓" / "puuttuu X €", täyte-merkintä
